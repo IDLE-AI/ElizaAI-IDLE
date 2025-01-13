@@ -16,11 +16,32 @@
     <script src="https://widgets.coingecko.com/gecko-coin-ticker-widget.js"></script>
 </head>
 <body>
-    <div class="ho-ho-ho">
+    <button id="secret-holiday-toggle" 
+        style="position: fixed;
+               top: 5px; 
+               right: 5px; 
+               width: 15px; 
+               height: 15px; 
+               opacity: 1; 
+               cursor: pointer;
+               background: none;
+               border: 1px solid currentColor;
+               border-radius: 50%;
+               padding: 0;
+               font-size: 8px;
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               transition: transform 0.3s ease;
+               z-index: 1001;" 
+        title="Holiday Toggle">
+        🎄
+    </button>
+    <div class="ho-ho-ho" style="display: none;">
         <img src="https://elizagen.howieduhzit.best/images/favicon.ico" alt="Eliza Icon" class="ho-ho-icon">
         <span class="ho-ho-text">HO HO HO!</span>
     </div>
-    <div class="snow-container">
+    <div class="snow-container" style="display: none;">
         <div class="snow"></div>
         <div class="snow"></div>
         <div class="snow"></div>
@@ -46,7 +67,7 @@
     <div class="top-frame">
         <div class="frame-content">
             <div class="site-branding">
-                <svg class="santa-hat" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <svg class="santa-hat" style="display: none;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <!-- Hat base -->
                     <path class="hat-base" d="M10,70 Q30,65 50,70 Q70,75 90,70 L80,50 Q50,45 20,50 Z" fill="#ff0000"/>
                     <!-- White fur trim -->

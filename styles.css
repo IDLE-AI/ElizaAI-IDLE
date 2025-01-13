@@ -1445,3 +1445,11 @@ gecko-coin-ticker-widget {
 .ho-ho-ho.active .ho-ho-icon {
     animation: iconSpin 2s ease-in-out infinite;
 }
+
+#secret-holiday-toggle:hover {
+    transform: scale(1.1);
+}
+
+#secret-holiday-toggle:active {
+    transform: scale(0.95);
+}

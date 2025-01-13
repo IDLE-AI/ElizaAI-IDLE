@@ -1090,13 +1090,37 @@ document.addEventListener('DOMContentLoaded', () => {
         hohoho.classList.add('active');
     });
 
-    // Santa hat click handler
+    // Add this near the top with other DOM element declarations
+    const secretButton = document.getElementById('secret-holiday-toggle');
+    const snowContainer = document.querySelector('.snow-container');
     const santaHat = document.querySelector('.santa-hat');
     const hohoho = document.querySelector('.ho-ho-ho');
 
+    // Add this with other initialization code
+    // Initialize holiday features
+    const holidayMode = localStorage.getItem('holidayMode') === 'true';
+    if (holidayMode) {
+        snowContainer.style.display = 'block';
+        santaHat.style.display = 'block';
+        hohoho.style.display = 'block';
+    }
+
+    // Holiday toggle button
+    secretButton.addEventListener('click', function() {
+        const currentDisplay = snowContainer.style.display;
+        const newDisplay = currentDisplay === 'none' ? 'block' : 'none';
+        
+        snowContainer.style.display = newDisplay;
+        santaHat.style.display = newDisplay;
+        hohoho.style.display = newDisplay;
+        
+        // Save preference
+        localStorage.setItem('holidayMode', newDisplay === 'block');
+    });
+
+    // Santa hat click animation
     if (santaHat && hohoho) {
         santaHat.addEventListener('click', () => {
-            console.log('Hat clicked!'); // Debug log
             hohoho.classList.remove('active');
             void hohoho.offsetWidth; // Force reflow
             hohoho.classList.add('active');
