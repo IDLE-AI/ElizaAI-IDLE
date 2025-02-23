@@ -1,0 +1,70 @@
+-e [0;34mℹ️  Environment variables:[0m
+npm_package_engines_npm=>=6.0.0
+TERM_PROGRAM=vscode
+NODE=/usr/local/bin/node
+INIT_CWD=/Users/mac/Documents/eliza-idle
+SHELL=/bin/bash
+TERM=xterm-256color
+TMPDIR=/var/folders/rk/nl961nbj5q353fzxv4n42hvm0000gn/T/
+npm_config_global_prefix=/usr/local
+TERM_PROGRAM_VERSION=1.97.2
+MallocNanoZone=0
+ORIGINAL_XDG_CURRENT_DESKTOP=undefined
+COLOR=1
+npm_config_noproxy=
+SDKMAN_PLATFORM=darwinx64
+npm_config_local_prefix=/Users/mac/Documents/eliza-idle
+USER=mac
+COMMAND_MODE=unix2003
+npm_config_globalconfig=/usr/local/etc/npmrc
+SDKMAN_CANDIDATES_API=https://api.sdkman.io/2
+SSH_AUTH_SOCK=/private/tmp/com.apple.launchd.IHdLPsJzxE/Listeners
+__CF_USER_TEXT_ENCODING=0x1F5:0x0:0x0
+npm_execpath=/usr/local/lib/node_modules/npm/bin/npm-cli.js
+PATH=/Users/mac/Documents/eliza-idle/node_modules/.bin:/Users/mac/Documents/node_modules/.bin:/Users/mac/node_modules/.bin:/Users/node_modules/.bin:/node_modules/.bin:/usr/local/lib/node_modules/npm/node_modules/@npmcli/run-script/lib/node-gyp-bin:/Users/mac/.bun/bin:/usr/local/opt/postgresql@15/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/share/dotnet:/opt/X11/bin:~/.dotnet/tools:/Applications/Wireshark.app/Contents/MacOS:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/mac/.bun/bin:/usr/local/opt/postgresql@15/bin:/Users/mac/.sdkman/candidates/java/current/bin
+npm_package_json=/Users/mac/Documents/eliza-idle/package.json
+npm_config_userconfig=/Users/mac/.npmrc
+npm_config_init_module=/Users/mac/.npm-init.js
+__CFBundleIdentifier=com.microsoft.VSCode
+npm_command=start
+PWD=/Users/mac/Documents/eliza-idle
+JAVA_HOME=/Users/mac/.sdkman/candidates/java/current
+npm_lifecycle_event=start
+EDITOR=vi
+npm_package_name=eliza-character-generator
+LANG=en_US.UTF-8
+npm_config_npm_version=10.2.4
+XPC_FLAGS=0x0
+npm_package_engines_node=>=14.0.0
+npm_config_node_gyp=/usr/local/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
+npm_package_config_port=4001
+npm_package_version=1.0.0
+XPC_SERVICE_NAME=0
+HOME=/Users/mac
+SHLVL=5
+npm_config_cache=/Users/mac/.npm
+LOGNAME=mac
+npm_lifecycle_script=node server.js
+SDKMAN_DIR=/Users/mac/.sdkman
+BUN_INSTALL=/Users/mac/.bun
+npm_config_user_agent=npm/10.2.4 node/v20.11.1 darwin x64 workspaces/false
+SDKMAN_CANDIDATES_DIR=/Users/mac/.sdkman/candidates
+DISPLAY=/private/tmp/com.apple.launchd.Rdt6SDxtjL/org.xquartz:0
+npm_node_execpath=/usr/local/bin/node
+npm_config_prefix=/usr/local
+COLORTERM=truecolor
+_=/usr/bin/env
+-e [0;34mℹ️  Current working directory:[0m
+/Users/mac/Documents/eliza-idle
+-e [0;34mℹ️  Homebrew already installed[0m
+-e [0;34mℹ️  gum is already installed[0m
+-e [0;34mℹ️  Installing dependencies...[0m
+==> Updating Homebrew...
+Already up-to-date.
+-e [0;34mℹ️  git is already installed[0m
+-e [0;34mℹ️  curl is already installed[0m
+-e [0;34mℹ️  python@3.13 is already installed[0m
+-e [0;34mℹ️  ffmpeg is already installed[0m
+-e [0;32m✅ Dependencies installed[0m
+-e [0;34mℹ️  NVM already installed[0m
+-e [0;34mℹ️  Setting up Node.js 23.3.0...[0m

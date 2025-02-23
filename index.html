@@ -1,512 +1,864 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Generate Eliza AI character JSONS with customizable personalities">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@ai16z">
-    <meta name="twitter:title" content="Eliza Character Generator">
-    <meta name="twitter:description" content="Generate Eliza AI character JSONS with customizable personalities">
-    <meta name="twitter:image" content="https://elizagen.howieduhzit.best/images/card.png">
-    <link rel="icon" type="image/x-icon" href="https://elizagen.howieduhzit.best/images/favicon.ico">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Generate Eliza AI character JSONS with customizable personalities"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ai16z" />
+    <meta name="twitter:title" content="Eliza Character Generator" />
+    <meta
+      name="twitter:description"
+      content="Generate Eliza AI character JSONS with customizable personalities"
+    />
+    <meta
+      name="twitter:image"
+      content="https://elizagen.howieduhzit.best/images/card.png"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://elizagen.howieduhzit.best/images/favicon.ico"
+    />
     <title>Eliza Character Generator</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <script src="https://widgets.coingecko.com/gecko-coin-ticker-widget.js"></script>
-</head>
-<body>
-    <button id="secret-holiday-toggle" 
-        style="position: fixed;
-               top: 5px; 
-               right: 5px; 
-               width: 15px; 
-               height: 15px; 
-               opacity: 1; 
-               cursor: pointer;
-               background: none;
-               border: 1px solid currentColor;
-               border-radius: 50%;
-               padding: 0;
-               font-size: 8px;
-               display: flex;
-               align-items: center;
-               justify-content: center;
-               transition: transform 0.3s ease;
-               z-index: 1001;" 
-        title="Holiday Toggle">
-        🎄
+  </head>
+  <body>
+    <button
+      id="secret-holiday-toggle"
+      style="
+        position: fixed;
+        top: 5px;
+        right: 5px;
+        width: 15px;
+        height: 15px;
+        opacity: 1;
+        cursor: pointer;
+        background: none;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        padding: 0;
+        font-size: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+        z-index: 1001;
+      "
+      title="Holiday Toggle"
+    >
+      🎄
     </button>
-    <div class="ho-ho-ho" style="display: none;">
-        <img src="https://elizagen.howieduhzit.best/images/favicon.ico" alt="Eliza Icon" class="ho-ho-icon">
-        <span class="ho-ho-text">HO HO HO!</span>
+    <div class="ho-ho-ho" style="display: none">
+      <img
+        src="https://elizagen.howieduhzit.best/images/favicon.ico"
+        alt="Eliza Icon"
+        class="ho-ho-icon"
+      />
+      <span class="ho-ho-text">HO HO HO!</span>
     </div>
-    <div class="snow-container" style="display: none;">
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow"></div>
-        <div class="snow-accumulation"></div>
+    <div class="snow-container" style="display: none">
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow"></div>
+      <div class="snow-accumulation"></div>
     </div>
     <div class="top-frame">
-        <div class="frame-content">
-            <div class="site-branding">
-                <svg class="santa-hat" style="display: none;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Hat base -->
-                    <path class="hat-base" d="M10,70 Q30,65 50,70 Q70,75 90,70 L80,50 Q50,45 20,50 Z" fill="#ff0000"/>
-                    <!-- White fur trim -->
-                    <path class="hat-trim" d="M10,70 Q30,65 50,70 Q70,75 90,70 Q70,80 50,75 Q30,70 10,70" fill="#ffffff"/>
-                    <!-- Hat top -->
-                    <path class="hat-top" d="M20,50 Q50,45 80,50 Q65,20 50,15 Q35,20 20,50" fill="#ff0000"/>
-                    <!-- Pom pom -->
-                    <circle class="pom-pom" cx="50" cy="15" r="8" fill="#ffffff"/>
-                </svg>
-                <img src="https://elizagen.howieduhzit.best/images/favicon.ico" alt="Eliza Icon" class="site-icon">
-                <h1 class="site-title">Eliza Character Generator</h1>
-            </div>
-            <div class="external-links">
-                <a href="https://github.com/ai16z/eliza" title="Eliza Main Repository" target="_blank" rel="noopener">
-                    <i class="fa-brands fa-github external-icon"></i>
-                </a>
-                <a href="https://github.com/HowieDuhzit/Eliza-Installer" title="Eliza Installer" target="_blank" rel="noopener">
-                    <i class="fa-solid fa-download external-icon"></i>
-                </a>
-                <a href="https://github.com/HowieDuhzit/Eliza-Character-Gen" title="Character Generator" target="_blank" rel="noopener">
-                    <i class="fa-solid fa-wand-magic-sparkles external-icon"></i>
-                </a>
-                <a href="https://www.daos.fun/HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC" title="ai16z DAO" target="_blank" rel="noopener">
-                    <i class="fa-solid fa-users external-icon"></i>
-                </a>
-                <div class="affiliate-dropdown">
-                    <button id="affiliate-toggle" class="affiliate-toggle" title="Affiliate Links">
-                        <i class="fa-solid fa-caret-down external-icon"></i>
-                    </button>
-                    <div class="affiliate-panel" id="affiliate-panel">
-                        <div class="affiliate-content">
-                            <img src="https://pbs.twimg.com/profile_images/1867831909100781569/vb9ghSVC_400x400.jpg" class="affiliate-icon" alt="Eliza.gg icon">
-                            <div class="affiliate-links">
-                                <a href="https://eliza.gg" target="_blank" rel="noopener" class="affiliate-link-text">Eliza.gg</a>
-                                <a href="https://x.com/chrislatorres" target="_blank" rel="noopener" class="credit-link">@chrislatorres</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button id="theme-toggle" class="theme-toggle" title="Toggle dark mode">
-                    <i class="fa-solid fa-moon theme-icon"></i>
-                </button>
-            </div>
+      <div class="frame-content">
+        <div class="site-branding">
+          <svg
+            class="santa-hat"
+            style="display: none"
+            viewBox="0 0 100 100"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Hat base -->
+            <path
+              class="hat-base"
+              d="M10,70 Q30,65 50,70 Q70,75 90,70 L80,50 Q50,45 20,50 Z"
+              fill="#ff0000"
+            />
+            <!-- White fur trim -->
+            <path
+              class="hat-trim"
+              d="M10,70 Q30,65 50,70 Q70,75 90,70 Q70,80 50,75 Q30,70 10,70"
+              fill="#ffffff"
+            />
+            <!-- Hat top -->
+            <path
+              class="hat-top"
+              d="M20,50 Q50,45 80,50 Q65,20 50,15 Q35,20 20,50"
+              fill="#ff0000"
+            />
+            <!-- Pom pom -->
+            <circle class="pom-pom" cx="50" cy="15" r="8" fill="#ffffff" />
+          </svg>
+          <img
+            src="https://elizagen.howieduhzit.best/images/favicon.ico"
+            alt="Eliza Icon"
+            class="site-icon"
+          />
+          <h1 class="site-title">Eliza Character Generator</h1>
         </div>
+        <div class="external-links">
+          <a
+            href="https://github.com/ai16z/eliza"
+            title="Eliza Main Repository"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="fa-brands fa-github external-icon"></i>
+          </a>
+          <a
+            href="https://github.com/HowieDuhzit/Eliza-Installer"
+            title="Eliza Installer"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="fa-solid fa-download external-icon"></i>
+          </a>
+          <a
+            href="https://github.com/HowieDuhzit/Eliza-Character-Gen"
+            title="Character Generator"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="fa-solid fa-wand-magic-sparkles external-icon"></i>
+          </a>
+          <a
+            href="https://www.daos.fun/HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"
+            title="ai16z DAO"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="fa-solid fa-users external-icon"></i>
+          </a>
+          <div class="affiliate-dropdown">
+            <button
+              id="affiliate-toggle"
+              class="affiliate-toggle"
+              title="Affiliate Links"
+            >
+              <i class="fa-solid fa-caret-down external-icon"></i>
+            </button>
+            <div class="affiliate-panel" id="affiliate-panel">
+              <div class="affiliate-content">
+                <img
+                  src="https://pbs.twimg.com/profile_images/1867831909100781569/vb9ghSVC_400x400.jpg"
+                  class="affiliate-icon"
+                  alt="Eliza.gg icon"
+                />
+                <div class="affiliate-links">
+                  <a
+                    href="https://eliza.gg"
+                    target="_blank"
+                    rel="noopener"
+                    class="affiliate-link-text"
+                    >Eliza.gg</a
+                  >
+                  <a
+                    href="https://x.com/chrislatorres"
+                    target="_blank"
+                    rel="noopener"
+                    class="credit-link"
+                    >@chrislatorres</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            title="Toggle dark mode"
+          >
+            <i class="fa-solid fa-moon theme-icon"></i>
+          </button>
+        </div>
+      </div>
     </div>
     <div class="container">
-        <div class="sidebar">
-            <section class="section">
-                <div class="section-header">
-                    <button class="icon-button help-button" title="Drop or select a character JSON file to load an existing character">
-                        <i class="fa-solid fa-file-import"></i>
-                    </button>
-                    <span>Load Character</span>
-                </div>
-                <div class="section-content">
-                    <div class="drop-zone" id="character-drop-zone">
-                        <div class="drop-zone-content">
-                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-                            <p>Drag and drop a character JSON file here</p>
-                            <span class="or-divider">or</span>
-                            <input type="file" id="character-file-input" accept=".json" style="display: none;">
-                            <button id="character-file-button" class="action-button" title="Select Character File">
-                                <i class="fa-solid fa-folder-open"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="character-file-status"></div>
-                    
-                    <div class="backup-management">
-                        <h3>Saved Backups</h3>
-                        <div class="backup-controls">
-                            <input type="text" id="new-backup-name" placeholder="Backup name">
-                            <button onclick="window.saveBackup(document.getElementById('new-backup-name').value)" class="primary-button">
-                                <i class="fa-solid fa-floppy-disk"></i> Save New
-                            </button>
-                        </div>
-                        <div id="backup-list" class="backup-list"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="section">
-                <div class="section-header">
-                    <span>Generate Character</span>
-                    <button class="icon-button help-button" title="Generate a new character using AI by providing a description">
-                        <i class="fa-solid fa-wand-sparkles"></i>
-                    </button>
-                </div>
-                <div class="section-content">
-                    <div class="form-group">
-                        <label for="model-select">AI Model</label>
-                        <select id="model-select">
-                            <optgroup label="OpenAI Models">
-                                <option value="openai/gpt-4-0125-preview">GPT-4 Turbo Preview (0125)</option>
-                                <option value="openai/gpt-4-1106-preview">GPT-4 Turbo Preview (1106)</option>
-                                <option value="openai/gpt-4-vision-preview">GPT-4 Vision</option>
-                                <option value="openai/gpt-4">GPT-4</option>
-                                <option value="openai/gpt-3.5-turbo-0125">GPT-3.5 Turbo (0125)</option>
-                                <option value="openai/gpt-3.5-turbo-1106">GPT-3.5 Turbo (1106)</option>
-                                <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo [FREE]</option>
-                            </optgroup>
-                            <optgroup label="Anthropic Models">
-                                <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
-                                <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
-                                <option value="anthropic/claude-2.1">Claude 2.1</option>
-                                <option value="anthropic/claude-2">Claude 2</option>
-                                <option value="anthropic/claude-instant-1.2">Claude Instant 1.2</option>
-                            </optgroup>
-                            <optgroup label="Google Models">
-                                <option value="google/gemini-pro">Gemini Pro [FREE]</option>
-                                <option value="google/gemini-pro-vision">Gemini Pro Vision</option>
-                                <option value="google/palm-2">PaLM 2 [FREE]</option>
-                                <option value="google/palm-2-vision">PaLM 2 Vision</option>
-                            </optgroup>
-                            <optgroup label="Meta Models">
-                                <option value="meta/llama-2-70b-chat">Llama 2 70B Chat [FREE]</option>
-                                <option value="meta/llama-2-13b-chat">Llama 2 13B Chat [FREE]</option>
-                                <option value="meta/llama-2-7b-chat">Llama 2 7B Chat [FREE]</option>
-                            </optgroup>
-                            <optgroup label="Mistral Models">
-                                <option value="mistral/mistral-large">Mistral Large</option>
-                                <option value="mistral/mistral-medium">Mistral Medium</option>
-                                <option value="mistral/mistral-small">Mistral Small [FREE]</option>
-                                <option value="mistral/mixtral-8x7b">Mixtral 8x7B [FREE]</option>
-                            </optgroup>
-                            <optgroup label="Other Models">
-                                <option value="perplexity/pplx-70b-online">PPLX 70B Online</option>
-                                <option value="perplexity/pplx-7b-online">PPLX 7B Online [FREE]</option>
-                                <option value="perplexity/pplx-70b-chat">PPLX 70B Chat</option>
-                                <option value="perplexity/pplx-7b-chat">PPLX 7B Chat [FREE]</option>
-                                <option value="cohere/command">Cohere Command</option>
-                                <option value="cohere/command-light">Cohere Command Light [FREE]</option>
-                                <option value="cohere/command-nightly">Cohere Command Nightly</option>
-                                <option value="cohere/command-light-nightly">Cohere Command Light Nightly [FREE]</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="api-key">OpenRouter API Key</label>
-                        <div id="api-key-input" class="input-group" style="display: none;">
-                            <input type="text" id="api-key" placeholder="Enter your OpenRouter API key starting with 'sk-' from openrouter.ai">
-                            <button id="save-key" class="action-button save-button" title="Save API Key">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                            </button>
-                        </div>
-                        <div id="api-key-status" class="api-key-status">
-                            <span class="status-text"></span>
-                            <button id="remove-key" class="action-button delete-button" title="Remove API Key">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="character-prompt">Character Description</label>
-                        <div class="input-group">
-                            <textarea id="character-prompt" placeholder="Describe your character in detail..."></textarea>
-                            <div class="button-group">
-                                <button id="generate-from-prompt" class="action-button generate-button" title="Generate from Prompt">
-                                    <i class="fa-solid fa-bolt"></i>
-                                </button>
-                                <button id="refine-character" class="action-button generate-button" title="Refine existing character">
-                                    <i class="fa-solid fa-wand-sparkles"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="prompt-status"></div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <div class="main-content">
-            <section class="section">
-                <div class="section-header">
-                    <span>Basic Information</span>
-                    <button class="icon-button help-button" title="Set the character's name, model provider, and voice settings">
-                        <i class="fa-solid fa-id-card"></i>
-                    </button>
-                </div>
-                <div class="section-content">
-                    <div class="form-group">
-                        <label for="character-name">Character Name</label>
-                        <input type="text" id="character-name" placeholder="Enter the character's full name (e.g., John Smith, Lady Catherine)">
-                    </div>
-                    <div class="form-group">
-                        <label>Available Clients</label>
-                        <div class="client-toggles">
-                            <button class="client-toggle" data-client="discord">Discord</button>
-                            <button class="client-toggle" data-client="direct">Direct</button>
-                            <button class="client-toggle" data-client="twitter">Twitter</button>
-                            <button class="client-toggle" data-client="telegram">Telegram</button>
-                            <button class="client-toggle" data-client="farcaster">Farcaster</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="model-provider">Model Provider</label>
-                        <select id="model-provider">
-                            <option value="">Select a provider</option>
-                            <option value="openai">OpenAI</option>
-                            <option value="eternalai">EternalAI</option>
-                            <option value="anthropic">Anthropic</option>
-                            <option value="grok">Grok</option>
-                            <option value="groq">Groq</option>
-                            <option value="llama_cloud">Llama Cloud</option>
-                            <option value="together">Together</option>
-                            <option value="llama_local">Llama Local</option>
-                            <option value="google">Google</option>
-                            <option value="claude_vertex">Claude Vertex</option>
-                            <option value="redpill">Redpill</option>
-                            <option value="openrouter">OpenRouter</option>
-                            <option value="ollama">Ollama</option>
-                            <option value="heurist">Heurist</option>
-                            <option value="galadriel">Galadriel</option>
-                            <option value="falai">FalAI</option>
-                            <option value="gaianet">GaiaNet</option>
-                            <option value="ali_bailian">Ali Bailian</option>
-                            <option value="volengine">VolEngine</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="voice-model">Voice Model</label>
-                        <input type="text" id="voice-model" placeholder="Voice synthesis model identifier for text-to-speech">
-                    </div>
-                </div>
-            </section>
-
-            <div class="two-columns">
-                <section class="section">
-                    <div class="section-header">
-                        <span>Character Details</span>
-                        <button class="icon-button help-button" title="Define the character's biography, lore, and areas of knowledge">
-                            <i class="fa-solid fa-book"></i>
-                        </button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="bio">Bio</label>
-                            <textarea id="bio" placeholder="Write the character's biography. Include their background, life experiences, and key personality traits. Write one complete sentence per line."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="lore">Lore</label>
-                            <textarea id="lore" placeholder="Describe the character's world, history, and important events that shaped them. Write one complete sentence per line."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="topics">Topics</label>
-                            <textarea id="topics" placeholder="List topics the character is knowledgeable about or interested in. Write one complete sentence per line."></textarea>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="section">
-                    <div class="section-header">
-                        <span>Style</span>
-                        <button class="icon-button help-button" title="Set how the character communicates in different contexts">
-                            <i class="fa-solid fa-pen-fancy"></i>
-                        </button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label for="style-all">General Style</label>
-                            <textarea id="style-all" placeholder="Describe how the character communicates in general. Include speech patterns, mannerisms, and typical expressions. Write one complete sentence per line."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="style-chat">Chat Style</label>
-                            <textarea id="style-chat" placeholder="Describe how the character behaves in conversations. Include response patterns and chat-specific mannerisms. Write one complete sentence per line."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="style-post">Post Style</label>
-                            <textarea id="style-post" placeholder="Describe how the character writes posts or longer content. Include formatting preferences and writing style. Write one complete sentence per line."></textarea>
-                        </div>
-                    </div>
-                </section>
+      <div class="sidebar">
+        <section class="section">
+          <div class="section-header">
+            <button
+              class="icon-button help-button"
+              title="Drop or select a character JSON file to load an existing character"
+            >
+              <i class="fa-solid fa-file-import"></i>
+            </button>
+            <span>Load Character</span>
+          </div>
+          <div class="section-content">
+            <div class="drop-zone" id="character-drop-zone">
+              <div class="drop-zone-content">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <p>Drag and drop a character JSON file here</p>
+                <span class="or-divider">or</span>
+                <input
+                  type="file"
+                  id="character-file-input"
+                  accept=".json"
+                  style="display: none"
+                />
+                <button
+                  id="character-file-button"
+                  class="action-button"
+                  title="Select Character File"
+                >
+                  <i class="fa-solid fa-folder-open"></i>
+                </button>
+              </div>
             </div>
+            <div id="character-file-status"></div>
 
-            <section class="section">
-                <div class="section-header">
-                    <span>Examples</span>
-                    <button class="icon-button help-button" title="Add example conversations and posts to demonstrate the character's style">
-                        <i class="fa-solid fa-comments"></i>
-                    </button>
-                </div>
-                <div class="section-content">
-                    <div class="form-group">
-                        <div class="message-examples-header">
-                            <label>Message Examples</label>
-                            <button id="add-example" class="action-button add-button" title="Add Example">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="message-examples-container"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="post-examples">Post Examples</label>
-                        <textarea id="post-examples" placeholder="Write example posts that demonstrate the character's writing style. Include different types of content they might create. Write one complete post per line."></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <div class="two-columns">
-                <section class="section">
-                    <div class="section-header">
-                        <span>Adjectives</span>
-                        <button class="icon-button help-button" title="Add single-word traits that describe the character">
-                            <i class="fa-solid fa-tags"></i>
-                        </button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <div class="adjectives-header">
-                                <label>Character Adjectives</label>
-                                <button id="add-adjective" class="action-button add-button" title="Add Adjective">+</button>
-                            </div>
-                            <div id="adjectives-container"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="section">
-                    <div class="section-header">
-                        <span>People</span>
-                        <button class="icon-button help-button" title="Add people that the character knows or has relationships with">
-                            <i class="fa-solid fa-user-group"></i>
-                        </button>
-                    </div>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <div class="people-header">
-                                <label>Known People</label>
-                                <button id="add-person" class="action-button add-button" title="Add Person">+</button>
-                            </div>
-                            <div id="people-container"></div>
-                        </div>
-                    </div>
-                </section>
+            <div class="backup-management">
+              <h3>Saved Backups</h3>
+              <div class="backup-controls">
+                <input
+                  type="text"
+                  id="new-backup-name"
+                  placeholder="Backup name"
+                />
+                <button
+                  onclick="window.saveBackup(document.getElementById('new-backup-name').value)"
+                  class="primary-button"
+                >
+                  <i class="fa-solid fa-floppy-disk"></i> Save New
+                </button>
+              </div>
+              <div id="backup-list" class="backup-list"></div>
             </div>
+          </div>
+        </section>
 
-            <section class="section">
-                <div class="section-header">
-                    <span>Knowledge Processing</span>
-                    <button class="icon-button help-button" title="Add knowledge to the character by uploading files or entering it manually">
-                        <i class="fa-solid fa-brain"></i>
-                    </button>
+        <section class="section">
+          <div class="section-header">
+            <span>Generate Character</span>
+            <button
+              class="icon-button help-button"
+              title="Generate a new character using AI by providing a description"
+            >
+              <i class="fa-solid fa-wand-sparkles"></i>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="form-group">
+              <label for="model-select">AI Model</label>
+              <select id="model-select">
+                <optgroup label="OpenAI Models">
+                  <option value="openai/gpt-4-0125-preview">
+                    GPT-4 Turbo Preview (0125)
+                  </option>
+                  <option value="openai/gpt-4-1106-preview">
+                    GPT-4 Turbo Preview (1106)
+                  </option>
+                  <option value="openai/gpt-4-vision-preview">
+                    GPT-4 Vision
+                  </option>
+                  <option value="openai/gpt-4">GPT-4</option>
+                  <option value="openai/gpt-3.5-turbo-0125">
+                    GPT-3.5 Turbo (0125)
+                  </option>
+                  <option value="openai/gpt-3.5-turbo-1106">
+                    GPT-3.5 Turbo (1106)
+                  </option>
+                  <option value="openai/gpt-3.5-turbo">
+                    GPT-3.5 Turbo [FREE]
+                  </option>
+                </optgroup>
+                <optgroup label="Anthropic Models">
+                  <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+                  <option value="anthropic/claude-3-sonnet">
+                    Claude 3 Sonnet
+                  </option>
+                  <option value="anthropic/claude-2.1">Claude 2.1</option>
+                  <option value="anthropic/claude-2">Claude 2</option>
+                  <option value="anthropic/claude-instant-1.2">
+                    Claude Instant 1.2
+                  </option>
+                </optgroup>
+                <optgroup label="Google Models">
+                  <option value="google/gemini-pro">Gemini Pro [FREE]</option>
+                  <option value="google/gemini-pro-vision">
+                    Gemini Pro Vision
+                  </option>
+                  <option value="google/palm-2">PaLM 2 [FREE]</option>
+                  <option value="google/palm-2-vision">PaLM 2 Vision</option>
+                </optgroup>
+                <optgroup label="Meta Models">
+                  <option value="meta/llama-2-70b-chat">
+                    Llama 2 70B Chat [FREE]
+                  </option>
+                  <option value="meta/llama-2-13b-chat">
+                    Llama 2 13B Chat [FREE]
+                  </option>
+                  <option value="meta/llama-2-7b-chat">
+                    Llama 2 7B Chat [FREE]
+                  </option>
+                </optgroup>
+                <optgroup label="Mistral Models">
+                  <option value="mistral/mistral-large">Mistral Large</option>
+                  <option value="mistral/mistral-medium">Mistral Medium</option>
+                  <option value="mistral/mistral-small">
+                    Mistral Small [FREE]
+                  </option>
+                  <option value="mistral/mixtral-8x7b">
+                    Mixtral 8x7B [FREE]
+                  </option>
+                </optgroup>
+                <optgroup label="Other Models">
+                  <option value="perplexity/pplx-70b-online">
+                    PPLX 70B Online
+                  </option>
+                  <option value="perplexity/pplx-7b-online">
+                    PPLX 7B Online [FREE]
+                  </option>
+                  <option value="perplexity/pplx-70b-chat">
+                    PPLX 70B Chat
+                  </option>
+                  <option value="perplexity/pplx-7b-chat">
+                    PPLX 7B Chat [FREE]
+                  </option>
+                  <option value="cohere/command">Cohere Command</option>
+                  <option value="cohere/command-light">
+                    Cohere Command Light [FREE]
+                  </option>
+                  <option value="cohere/command-nightly">
+                    Cohere Command Nightly
+                  </option>
+                  <option value="cohere/command-light-nightly">
+                    Cohere Command Light Nightly [FREE]
+                  </option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="api-key">OpenRouter API Key</label>
+              <div id="api-key-input" class="input-group" style="display: none">
+                <input
+                  type="text"
+                  id="api-key"
+                  placeholder="Enter your OpenRouter API key starting with 'sk-' from openrouter.ai"
+                />
+                <button
+                  id="save-key"
+                  class="action-button save-button"
+                  title="Save API Key"
+                >
+                  <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+              </div>
+              <div id="api-key-status" class="api-key-status">
+                <span class="status-text"></span>
+                <button
+                  id="remove-key"
+                  class="action-button delete-button"
+                  title="Remove API Key"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="character-prompt">Character Description</label>
+              <div class="input-group">
+                <textarea
+                  id="character-prompt"
+                  placeholder="Describe your character in detail..."
+                ></textarea>
+                <div class="button-group">
+                  <button
+                    id="generate-from-prompt"
+                    class="action-button generate-button"
+                    title="Generate from Prompt"
+                  >
+                    <i class="fa-solid fa-bolt"></i>
+                  </button>
+                  <button
+                    id="refine-character"
+                    class="action-button generate-button"
+                    title="Refine existing character"
+                  >
+                    <i class="fa-solid fa-wand-sparkles"></i>
+                  </button>
                 </div>
-                <div class="section-content">
-                    <div class="drop-zone knowledge-drop-zone" id="drop-zone">
-                        <div class="drop-zone-content">
-                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-                            <p>Drag and drop PDF or text files here to add to the character's knowledge base</p>
-                            <span class="or-divider">or</span>
-                            <input type="file" id="file-input" multiple style="display: none;">
-                            <button id="file-button" class="action-button" title="Select Knowledge Files">
-                                <i class="fa-solid fa-folder-open"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div id="file-list"></div>
-                    <div id="processing-status"></div>
-                    <div class="process-controls">
-                        <button id="process-knowledge" class="action-button generate-button" title="Process Knowledge Files">
-                            <i class="fa-solid fa-gears"></i>
-                        </button>
-                    </div>
-                    <div class="knowledge-display">
-                        <div class="knowledge-header">
-                            <h3>Knowledge Base</h3>
-                            <button id="add-knowledge" class="action-button add-button" title="Add Knowledge Entry">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="knowledge-entries" class="knowledge-entries"></div>
-                    </div>
-                </div>
-            </section>
+              </div>
+              <div id="prompt-status"></div>
+            </div>
+          </div>
+        </section>
+      </div>
 
-            <section class="section">
-                <div class="section-header">
-                    <span>Character Result</span>
-                    <button class="icon-button help-button" title="Generate and download the final character JSON">
-                        <i class="fa-solid fa-code"></i>
-                    </button>
-                </div>
-                <div class="section-content">
-                    <div class="result-controls">
-                        <button id="generate-json" class="action-button generate-button" title="Generate Character">
-                            <i class="fa-solid fa-bolt"></i>
-                        </button>
-                        <button id="download-json" class="action-button download-button" title="Download JSON" disabled>
-                            <i class="fa-solid fa-download"></i>
-                        </button>
-                    </div>
-                    <div id="knowledge-content" class="debug-output"></div>
-                </div>
-            </section>
+      <div class="main-content">
+        <section class="section">
+          <div class="section-header">
+            <span>Basic Information</span>
+            <button
+              class="icon-button help-button"
+              title="Set the character's name, model provider, and voice settings"
+            >
+              <i class="fa-solid fa-id-card"></i>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="form-group">
+              <label for="character-name">Character Name</label>
+              <input
+                type="text"
+                id="character-name"
+                placeholder="Enter the character's full name (e.g., John Smith, Lady Catherine)"
+              />
+            </div>
+            <div class="form-group">
+              <label>Available Clients</label>
+              <div class="client-toggles">
+                <button class="client-toggle" data-client="discord">
+                  Discord
+                </button>
+                <button class="client-toggle" data-client="direct">
+                  Direct
+                </button>
+                <button class="client-toggle" data-client="twitter">
+                  Twitter
+                </button>
+                <button class="client-toggle" data-client="telegram">
+                  Telegram
+                </button>
+                <button class="client-toggle" data-client="farcaster">
+                  Farcaster
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="model-provider">Model Provider</label>
+              <select id="model-provider">
+                <option value="">Select a provider</option>
+                <option value="openai">OpenAI</option>
+                <option value="eternalai">EternalAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="grok">Grok</option>
+                <option value="groq">Groq</option>
+                <option value="llama_cloud">Llama Cloud</option>
+                <option value="together">Together</option>
+                <option value="llama_local">Llama Local</option>
+                <option value="google">Google</option>
+                <option value="claude_vertex">Claude Vertex</option>
+                <option value="redpill">Redpill</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="ollama">Ollama</option>
+                <option value="heurist">Heurist</option>
+                <option value="galadriel">Galadriel</option>
+                <option value="falai">FalAI</option>
+                <option value="gaianet">GaiaNet</option>
+                <option value="ali_bailian">Ali Bailian</option>
+                <option value="volengine">VolEngine</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="voice-model">Voice Model</label>
+              <input
+                type="text"
+                id="voice-model"
+                placeholder="Voice synthesis model identifier for text-to-speech"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div class="two-columns">
+          <section class="section">
+            <div class="section-header">
+              <span>Character Details</span>
+              <button
+                class="icon-button help-button"
+                title="Define the character's biography, lore, and areas of knowledge"
+              >
+                <i class="fa-solid fa-book"></i>
+              </button>
+            </div>
+            <div class="section-content">
+              <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea
+                  id="bio"
+                  placeholder="Write the character's biography. Include their background, life experiences, and key personality traits. Write one complete sentence per line."
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="lore">Lore</label>
+                <textarea
+                  id="lore"
+                  placeholder="Describe the character's world, history, and important events that shaped them. Write one complete sentence per line."
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="topics">Topics</label>
+                <textarea
+                  id="topics"
+                  placeholder="List topics the character is knowledgeable about or interested in. Write one complete sentence per line."
+                ></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-header">
+              <span>Style</span>
+              <button
+                class="icon-button help-button"
+                title="Set how the character communicates in different contexts"
+              >
+                <i class="fa-solid fa-pen-fancy"></i>
+              </button>
+            </div>
+            <div class="section-content">
+              <div class="form-group">
+                <label for="style-all">General Style</label>
+                <textarea
+                  id="style-all"
+                  placeholder="Describe how the character communicates in general. Include speech patterns, mannerisms, and typical expressions. Write one complete sentence per line."
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="style-chat">Chat Style</label>
+                <textarea
+                  id="style-chat"
+                  placeholder="Describe how the character behaves in conversations. Include response patterns and chat-specific mannerisms. Write one complete sentence per line."
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="style-post">Post Style</label>
+                <textarea
+                  id="style-post"
+                  placeholder="Describe how the character writes posts or longer content. Include formatting preferences and writing style. Write one complete sentence per line."
+                ></textarea>
+              </div>
+            </div>
+          </section>
         </div>
 
-        <div class="credits-column">
-            <gecko-coin-ticker-widget 
-                locale="en" 
-                dark-mode="auto" 
-                outlined="true" 
-                coin-id="ai16z" 
-                initial-currency="usd">
-            </gecko-coin-ticker-widget>
+        <section class="section">
+          <div class="section-header">
+            <span>Examples</span>
+            <button
+              class="icon-button help-button"
+              title="Add example conversations and posts to demonstrate the character's style"
+            >
+              <i class="fa-solid fa-comments"></i>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="form-group">
+              <div class="message-examples-header">
+                <label>Message Examples</label>
+                <button
+                  id="add-example"
+                  class="action-button add-button"
+                  title="Add Example"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <div id="message-examples-container"></div>
+            </div>
+            <div class="form-group">
+              <label for="post-examples">Post Examples</label>
+              <textarea
+                id="post-examples"
+                placeholder="Write example posts that demonstrate the character's writing style. Include different types of content they might create. Write one complete post per line."
+              ></textarea>
+            </div>
+          </div>
+        </section>
 
-            <section class="section">
-                <div class="section-header">
-                    <span>Credits</span>
-                    <button class="icon-button help-button" title="Project credits and acknowledgments">
-                        <i class="fa-solid fa-heart"></i>
-                    </button>
+        <div class="two-columns">
+          <section class="section">
+            <div class="section-header">
+              <span>Adjectives</span>
+              <button
+                class="icon-button help-button"
+                title="Add single-word traits that describe the character"
+              >
+                <i class="fa-solid fa-tags"></i>
+              </button>
+            </div>
+            <div class="section-content">
+              <div class="form-group">
+                <div class="adjectives-header">
+                  <label>Character Adjectives</label>
+                  <button
+                    id="add-adjective"
+                    class="action-button add-button"
+                    title="Add Adjective"
+                  >
+                    +
+                  </button>
                 </div>
-                <div class="section-content">
-                    <div class="credits-list">
-                        <div class="credit-item">
-                            <h4>Eliza AI</h4>
-                            <p>Created by <a href="https://github.com/ai16z" target="_blank" rel="noopener">ai16z</a></p>
-                            <ul class="credit-list">
-                                <li><a href="https://github.com/lalalune" target="_blank" rel="noopener">@lalalune</a></li>
-                                <li><a href="https://github.com/fabianhug" target="_blank" rel="noopener">@fabianhug</a></li>
-                                <li><a href="https://github.com/shakkernerd" target="_blank" rel="noopener">@shakkernerd</a></li>
-                            </ul>
-                        </div>
-                        <div class="credit-item">
-                            <h4>Tools</h4>
-                            <p>Installer & Character Generator <a href="https://github.com/HowieDuhzit" target="_blank" rel="noopener">HowieDuhzit</a></p>
-                        </div>
-                        <div class="credit-item">
-                            <h4>Special Thanks</h4>
-                            <ul class="special-thanks-list">
-                                <li>To <a href="https://github.com/madjin" target="_blank" rel="noopener">@madjin</a> for being the breathing documentation and all around connector of dots</li>
-                                <li>To the ai16z <a href="https://www.daos.fun/HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC" target="_blank" rel="noopener">DAO</a> community</li>
-                            </ul>
-                        </div>
-                    </div>
+                <div id="adjectives-container"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-header">
+              <span>People</span>
+              <button
+                class="icon-button help-button"
+                title="Add people that the character knows or has relationships with"
+              >
+                <i class="fa-solid fa-user-group"></i>
+              </button>
+            </div>
+            <div class="section-content">
+              <div class="form-group">
+                <div class="people-header">
+                  <label>Known People</label>
+                  <button
+                    id="add-person"
+                    class="action-button add-button"
+                    title="Add Person"
+                  >
+                    +
+                  </button>
                 </div>
-            </section>
+                <div id="people-container"></div>
+              </div>
+            </div>
+          </section>
         </div>
+
+        <section class="section">
+          <div class="section-header">
+            <span>Knowledge Processing</span>
+            <button
+              class="icon-button help-button"
+              title="Add knowledge to the character by uploading files or entering it manually"
+            >
+              <i class="fa-solid fa-brain"></i>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="drop-zone knowledge-drop-zone" id="drop-zone">
+              <div class="drop-zone-content">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <p>
+                  Drag and drop PDF or text files here to add to the character's
+                  knowledge base
+                </p>
+                <span class="or-divider">or</span>
+                <input
+                  type="file"
+                  id="file-input"
+                  multiple
+                  style="display: none"
+                />
+                <button
+                  id="file-button"
+                  class="action-button"
+                  title="Select Knowledge Files"
+                >
+                  <i class="fa-solid fa-folder-open"></i>
+                </button>
+              </div>
+            </div>
+            <div id="file-list"></div>
+            <div id="processing-status"></div>
+            <div class="process-controls">
+              <button
+                id="process-knowledge"
+                class="action-button generate-button"
+                title="Process Knowledge Files"
+              >
+                <i class="fa-solid fa-gears"></i>
+              </button>
+            </div>
+            <div class="knowledge-display">
+              <div class="knowledge-header">
+                <h3>Knowledge Base</h3>
+                <button
+                  id="add-knowledge"
+                  class="action-button add-button"
+                  title="Add Knowledge Entry"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <div id="knowledge-entries" class="knowledge-entries"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-header">
+            <span>Character Result</span>
+            <button
+              class="icon-button help-button"
+              title="Generate and download the final character JSON"
+            >
+              <i class="fa-solid fa-code"></i>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="result-controls">
+              <button
+                id="generate-json"
+                class="action-button generate-button"
+                title="Generate Character"
+              >
+                <i class="fa-solid fa-bolt"></i>
+              </button>
+              <button
+                id="download-json"
+                class="action-button download-button"
+                title="Download JSON"
+                disabled
+              >
+                <i class="fa-solid fa-download"></i>
+              </button>
+              <button
+                id="generate-character"
+                class="action-button generate-button"
+                title="Generate Character"
+              >
+                <i class="fa-solid fa-cogs"></i> Generate Character
+              </button>
+            </div>
+            <div id="knowledge-content" class="debug-output"></div>
+            <div id="character-display" class="character-display"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="credits-column">
+        <gecko-coin-ticker-widget
+          locale="en"
+          dark-mode="auto"
+          outlined="true"
+          coin-id="ai16z"
+          initial-currency="usd"
+        >
+        </gecko-coin-ticker-widget>
+
+        <section class="section">
+          <div class="section-header">
+            <span>Credits</span>
+            <button
+              class="icon-button help-button"
+              title="Project credits and acknowledgments"
+            >
+              <i class="fa-solid fa-heart"></i>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="credits-list">
+              <div class="credit-item">
+                <h4>Eliza AI</h4>
+                <p>
+                  Created by
+                  <a
+                    href="https://github.com/ai16z"
+                    target="_blank"
+                    rel="noopener"
+                    >ai16z</a
+                  >
+                </p>
+                <ul class="credit-list">
+                  <li>
+                    <a
+                      href="https://github.com/lalalune"
+                      target="_blank"
+                      rel="noopener"
+                      >@lalalune</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/fabianhug"
+                      target="_blank"
+                      rel="noopener"
+                      >@fabianhug</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/shakkernerd"
+                      target="_blank"
+                      rel="noopener"
+                      >@shakkernerd</a
+                    >
+                  </li>
+                </ul>
+              </div>
+              <div class="credit-item">
+                <h4>Tools</h4>
+                <p>
+                  Installer & Character Generator
+                  <a
+                    href="https://github.com/HowieDuhzit"
+                    target="_blank"
+                    rel="noopener"
+                    >HowieDuhzit</a
+                  >
+                </p>
+              </div>
+              <div class="credit-item">
+                <h4>Special Thanks</h4>
+                <ul class="special-thanks-list">
+                  <li>
+                    To
+                    <a
+                      href="https://github.com/madjin"
+                      target="_blank"
+                      rel="noopener"
+                      >@madjin</a
+                    >
+                    for being the breathing documentation and all around
+                    connector of dots
+                  </li>
+                  <li>
+                    To the ai16z
+                    <a
+                      href="https://www.daos.fun/HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"
+                      target="_blank"
+                      rel="noopener"
+                      >DAO</a
+                    >
+                    community
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
 
     <script src="app.js"></script>
-</body>
+  </body>
 </html>

@@ -1,0 +1,28 @@
+[0;34mℹ️  Homebrew already installed[0m
+[0;34mℹ️  gum is already installed[0m
+[0;34mℹ️  Installing dependencies...[0m
+==> Updating Homebrew...
+Already up-to-date.
+[0;34mℹ️  git is already installed[0m
+[0;34mℹ️  curl is already installed[0m
+[0;34mℹ️  python@3.13 is already installed[0m
+[0;34mℹ️  ffmpeg is already installed[0m
+[0;34mℹ️  NVM already installed[0m
+[0;34mℹ️  Setting up Node.js 23.3.0...[0m
+v23.3.0 is already installed.
+Now using node v23.3.0 (npm v10.9.0)
+[0;32meliza[0m [0;90m->[0m [0;32m23.3.0[0m ([0;90m->[0m [0;32mv23.3.0[0m)
+Now using node v23.3.0 (npm v10.9.0)
+(node:94293) ExperimentalWarning: CommonJS module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+changed 1 package in 2s
+Preparing pnpm@latest for immediate activation...
+[0;32m✅ Node.js setup complete[0m
+[0;34mℹ️  Setting up environment...[0m
+[0;32m✅ Environment setup complete[0m
+[0;34mℹ️  Starting Eliza...[0m
+[0;32m✅ Eliza started with PID: 94313[0m
+[0;32m✅ Setup completed successfully![0m
+This project is configured to use yarn because /Users/mac/package.json has a "packageManager" field

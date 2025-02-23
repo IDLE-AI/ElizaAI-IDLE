@@ -1,0 +1,31 @@
+[0;34mℹ️  Homebrew already installed[0m
+[0;34mℹ️  gum is already installed[0m
+[0;34mℹ️  Installing dependencies...[0m
+==> Updating Homebrew...
+Already up-to-date.
+[0;34mℹ️  git is already installed[0m
+[0;34mℹ️  curl is already installed[0m
+[0;34mℹ️  python@3.13 is already installed[0m
+[0;34mℹ️  ffmpeg is already installed[0m
+[0;34mℹ️  NVM already installed[0m
+[0;34mℹ️  Setting up Node.js 23.3.0...[0m
+v23.3.0 is already installed.
+Now using node v23.3.0 (npm v10.9.0)
+[0;32meliza[0m [0;90m->[0m [0;32m23.3.0[0m ([0;90m->[0m [0;32mv23.3.0[0m)
+Now using node v23.3.0 (npm v10.9.0)
+(node:34020) ExperimentalWarning: CommonJS module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+changed 1 package in 1s
+Preparing pnpm@latest for immediate activation...
+[0;32m✅ Node.js setup complete[0m
+[0;34mℹ️  Setting up environment...[0m
+[0;32m✅ Environment setup complete[0m
+[0;34mℹ️  Finding latest character file...[0m
+[0;34mℹ️  Starting Eliza with latest character file: [0;34mℹ️  Looking for character files in: /Users/mac/Documents/eliza-idle/eliza/characters[0m
+[0;32m✅ Found latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-05-52-468Z.json[0m
+/Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-05-52-468Z.json[0m
+[0;31m❌ Character file not found: [0;34mℹ️  Looking for character files in: /Users/mac/Documents/eliza-idle/eliza/characters[0m
+[0;32m✅ Found latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-05-52-468Z.json[0m
+/Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-05-52-468Z.json[0m

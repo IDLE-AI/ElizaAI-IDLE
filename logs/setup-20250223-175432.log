@@ -1,0 +1,13 @@
+[0;34mℹ️  Homebrew already installed[0m
+[0;34mℹ️  gum is already installed[0m
+[0;34mℹ️  Installing dependencies...[0m
+==> Updating Homebrew...
+Already up-to-date.
+[0;34mℹ️  git is already installed[0m
+[0;34mℹ️  curl is already installed[0m
+[0;34mℹ️  python@3.13 is already installed[0m
+[0;34mℹ️  ffmpeg is already installed[0m
+[0;34mℹ️  NVM already installed[0m
+[0;34mℹ️  Setting up Node.js 23.3.0...[0m
+nvm is not compatible with the "npm_config_prefix" environment variable: currently set to "/usr/local"
+Run `unset npm_config_prefix` to unset it.

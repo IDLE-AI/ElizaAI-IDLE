@@ -1,0 +1,11 @@
+ℹ️  Homebrew already installed
+ℹ️  gum is already installed
+ℹ️  Installing dependencies...
+Error: Running Homebrew as root is extremely dangerous and no longer supported.
+As Homebrew does not drop privileges on installation you would be giving all
+build scripts full access to your system.
+❌ Failed to update Homebrew
+Error: Running Homebrew as root is extremely dangerous and no longer supported.
+As Homebrew does not drop privileges on installation you would be giving all
+build scripts full access to your system.
+❌ Failed to install git

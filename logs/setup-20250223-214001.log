@@ -1,0 +1,68 @@
+ℹ️  Homebrew already installed
+ℹ️  gum is already installed
+ℹ️  Installing dependencies...
+==> Updating Homebrew...
+Already up-to-date.
+ℹ️  git is already installed
+ℹ️  curl is already installed
+ℹ️  python@3.13 is already installed
+ℹ️  ffmpeg is already installed
+ℹ️  NVM already installed
+ℹ️  Setting up Node.js 23.3.0...
+v23.3.0 is already installed.
+Now using node v23.3.0 (npm v10.9.0)
+eliza -> 23.3.0 (-> v23.3.0)
+Now using node v23.3.0 (npm v10.9.0)
+(node:44708) ExperimentalWarning: CommonJS module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+changed 1 package in 617ms
+Preparing pnpm@latest for immediate activation...
+✅ Node.js setup complete
+ℹ️  Setting up environment...
+✅ Environment setup complete
+ℹ️  Finding latest character file...
+ℹ️  Looking for character files in: /Users/mac/Documents/eliza-idle/eliza/characters
+✅ Found latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+ℹ️  Starting Eliza with latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+DEBUG: Checking if character file exists: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+✅ Character file exists: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+ℹ️  Starting Eliza with character from: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+ℹ️  Starting Eliza with CHARACTER_FILE=/Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+
+> eliza@ start /Users/mac/Documents/eliza-idle/eliza
+> pnpm --filter "@elizaos/agent" start --isRoot
+
+
+> @elizaos/agent@0.25.6-alpha.1 start /Users/mac/Documents/eliza-idle/eliza/agent
+> node --loader ts-node/esm src/index.ts "--isRoot"
+
+(node:44782) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:44782) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✅ Eliza started with PID: 44738 using character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+✅ Setup completed successfully!
+
+node:internal/modules/run_main:122
+    triggerUncaughtException(
+    ^
+Error: Cannot find module '/Users/mac/Documents/eliza-idle/eliza/agent/node_modules/@elizaos/adapter-postgres/dist/index.js' imported from /Users/mac/Documents/eliza-idle/eliza/agent/src/index.ts
+    at finalizeResolution (/Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/dist-raw/node-internal-modules-esm-resolve.js:352:11)
+    at moduleResolve (/Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/dist-raw/node-internal-modules-esm-resolve.js:801:10)
+    at Object.defaultResolve (/Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/dist-raw/node-internal-modules-esm-resolve.js:912:11)
+    at /Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/src/esm.ts:218:35
+    at entrypointFallback (/Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/src/esm.ts:168:34)
+    at /Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/src/esm.ts:217:14
+    at addShortCircuitFlag (/Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/src/esm.ts:409:21)
+    at resolve (/Users/mac/Documents/eliza-idle/eliza/node_modules/ts-node/src/esm.ts:197:12)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30)
+
+Node.js v23.3.0
+/Users/mac/Documents/eliza-idle/eliza/agent:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @elizaos/agent@0.25.6-alpha.1 start: `node --loader ts-node/esm src/index.ts "--isRoot"`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.
