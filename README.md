@@ -195,3 +195,4 @@ This project is licensed under the [MIT License](LICENSE).
 For support, please:
 1. Check the [GitHub Issues](https://github.com/HowieDuhzit/Eliza-Character-Gen/issues)
 2. Join the [ai16z DAO](https://www.daos.fun/HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC)
+# eliza-idleai
