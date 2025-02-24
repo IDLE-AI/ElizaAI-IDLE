@@ -1,0 +1,20 @@
+[0;34mℹ️  Verifying directory structure...[0m
+[0;32m✅ Directory structure verified[0m
+[0;34mℹ️  Homebrew already installed[0m
+[0;34mℹ️  Installing dependencies...[0m
+==> Updating Homebrew...
+Already up-to-date.
+[0;34mℹ️  git is already installed[0m
+[0;34mℹ️  curl is already installed[0m
+[0;34mℹ️  python@3.13 is already installed[0m
+[0;34mℹ️  ffmpeg is already installed[0m
+[0;34mℹ️  gum is already installed[0m
+[0;34mℹ️  NVM already installed[0m
+[0;34mℹ️  Setting up Node.js 23.3.0...[0m
+v23.3.0 is already installed.
+Now using node v23.3.0 (npm v10.9.0)
+[0;32meliza[0m [0;90m->[0m [0;32m23.3.0[0m ([0;90m->[0m [0;32mv23.3.0[0m)
+Now using node v23.3.0 (npm v10.9.0)
+[0;34mℹ️  pnpm is already installed. Checking version...[0m
+This project is configured to use yarn because /Users/mac/package.json has a "packageManager" field
+[0;34mℹ️  Cleaning up...[0m

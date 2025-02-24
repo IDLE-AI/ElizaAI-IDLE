@@ -1,0 +1,40 @@
+ℹ️  Homebrew already installed
+ℹ️  gum is already installed
+ℹ️  Installing dependencies...
+==> Updating Homebrew...
+Already up-to-date.
+ℹ️  git is already installed
+ℹ️  curl is already installed
+ℹ️  python@3.13 is already installed
+ℹ️  ffmpeg is already installed
+ℹ️  NVM already installed
+ℹ️  Setting up Node.js 23.3.0...
+v23.3.0 is already installed.
+Now using node v23.3.0 (npm v10.9.0)
+eliza -> 23.3.0 (-> v23.3.0)
+Now using node v23.3.0 (npm v10.9.0)
+(node:10847) ExperimentalWarning: CommonJS module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+changed 1 package in 615ms
+Preparing pnpm@latest for immediate activation...
+✅ Node.js setup complete
+ℹ️  Setting up environment...
+✅ Environment setup complete
+ℹ️  Finding latest character file...
+ℹ️  Starting Eliza with latest character file: ℹ️  Looking for character files in: /Users/mac/Documents/eliza-idle/eliza/characters
+✅ Found latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+/Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+ℹ️  Checking character file: ℹ️  Looking for character files in: /Users/mac/Documents/eliza-idle/eliza/characters
+✅ Found latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+/Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+❌ Character file does not exist: ℹ️  Looking for character files in: /Users/mac/Documents/eliza-idle/eliza/characters
+✅ Found latest character file: /Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+/Users/mac/Documents/eliza-idle/eliza/characters/Idle-2025-02-23T12-39-23-301Z.json
+ℹ️  Current directory contents:
+total 16
+drwxr-xr-x@  4 mac  staff   128 Feb 23 22:19 .
+drwxr-xr-x@ 47 mac  staff  1504 Feb 23 21:52 ..
+-rwxr-xr-x@  1 mac  staff  2235 Feb 23 19:34 Idle-2025-02-23T12-34-24-677Z.json
+-rw-r--r--@  1 mac  staff  2235 Feb 23 19:39 Idle-2025-02-23T12-39-23-301Z.json

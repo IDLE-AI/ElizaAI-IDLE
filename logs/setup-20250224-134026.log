@@ -1,0 +1,29 @@
+[0;34mℹ️  Verifying directory structure...[0m
+[0;32m✅ Directory structure verified[0m
+[0;34mℹ️  Homebrew already installed[0m
+[0;34mℹ️  Installing dependencies...[0m
+==> Updating Homebrew...
+Already up-to-date.
+[0;34mℹ️  git is already installed[0m
+[0;34mℹ️  curl is already installed[0m
+[0;34mℹ️  python@3.13 is already installed[0m
+[0;34mℹ️  ffmpeg is already installed[0m
+[0;34mℹ️  gum is already installed[0m
+[0;34mℹ️  NVM already installed[0m
+[0;34mℹ️  Setting up Node.js 23.3.0...[0m
+v23.3.0 is already installed.
+Now using node v23.3.0 (npm v10.9.0)
+[0;32meliza[0m [0;90m->[0m [0;32m23.3.0[0m ([0;90m->[0m [0;32mv23.3.0[0m)
+Now using node v23.3.0 (npm v10.9.0)
+(node:89536) ExperimentalWarning: CommonJS module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/mac/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm error code EEXIST
+npm error path /Users/mac/.nvm/versions/node/v23.3.0/bin/pnpx
+npm error EEXIST: file already exists
+npm error File exists: /Users/mac/.nvm/versions/node/v23.3.0/bin/pnpx
+npm error Remove the existing file and try again, or run npm
+npm error with --force to overwrite files recklessly.
+npm error A complete log of this run can be found in: /Users/mac/.npm/_logs/2025-02-24T06_40_50_695Z-debug-0.log
+[0;31m❌ Failed to install pnpm[0m
+[0;34mℹ️  Cleaning up...[0m
