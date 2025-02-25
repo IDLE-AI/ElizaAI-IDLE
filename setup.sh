@@ -9,7 +9,13 @@ NC='\033[0m'; BOLD='\033[1m'
 log_error() { gum style --foreground 1 "❌ ${1}"; }
 log_success() { gum style --foreground 2 "✅ ${1}"; }
 log_info() { gum style --foreground 4 "ℹ️  ${1}"; }
-handle_error() { log_error "Error occurred in: $1"; log_error "Exit code: $2"; exit 1; }
+handle_error() { 
+    log_error "Error occurred in: $1 (Exit Code: $2)"
+    echo "🔴 Error in: $1 (Exit Code: $2)" >> /tmp/eliza-setup.log
+    tail -n 50 ./setup.error.log  
+    exit 1
+}
+
 trap 'handle_error "${BASH_SOURCE[0]}:${LINENO}" $?' ERR
 install_gum() {
     if ! command -v gum &> /dev/null; then
@@ -97,8 +103,48 @@ clone_repository() {
     fi
 }
 setup_environment() {
-    [ ! -f .env ] && cp .env.example .env && log_success "Environment file created"
+    log_info "🔍 Entering setup_environment"
+
+    if [ ! -f .env ]; then
+        log_info "📁 .env file not found, creating..."
+        cp .env.example .env || { log_error "❌ Failed to create .env"; exit 1; }
+        log_success "✅ Environment file created"
+    else
+        log_info "✅ .env file already exists"
+    fi
+
+    log_info "🔍 Exiting setup_environment"
 }
+# build_and_start() {
+#     gum spin --spinner dot --title "Installing project dependencies..." -- \
+#         pnpm clean && pnpm install --no-frozen-lockfile
+#     log_success "Dependencies installed"
+
+#     gum spin --spinner dot --title "Building project..." -- pnpm build && pnpm rebuild
+#     log_success "Project built successfully"
+
+#     # log_info "Starting Eliza services..."
+#     # pnpm start & pnpm start:service:all
+#     # sleep 5
+#     log_info "Starting Eliza with character file: $CHARACTER_FILE"
+#     if [ -z "$CHARACTER_FILE" ]; then
+#         log_error "No CHARACTER_FILE provided! Exiting..."
+#         exit 1
+#     fi
+#     cd "$(dirname "$0")/eliza" || { log_error "Failed to enter Eliza directory"; exit 1; }
+#     pnpm start --character="characters/$CHARACTER_FILE" || {
+#     log_error "❌ Eliza failed to start"
+#     exit 1
+
+#     if command -v xdg-open >/dev/null 2>&1; then
+#         xdg-open "http://localhost:5173"
+#     elif command -v open >/dev/null 2>&1; then
+#         open "http://localhost:5173"
+#     else
+#         log_info "Please open http://localhost:5173 in your browser"
+#     fi
+# }
+
 build_and_start() {
     gum spin --spinner dot --title "Installing project dependencies..." -- \
         pnpm clean && pnpm install --no-frozen-lockfile
@@ -107,10 +153,22 @@ build_and_start() {
     gum spin --spinner dot --title "Building project..." -- pnpm build && pnpm rebuild
     log_success "Project built successfully"
 
-    log_info "Starting Eliza services..."
-    pnpm start & pnpm start:client &
-    sleep 5
+    log_info "Starting Eliza with character file: $CHARACTER_FILE"
 
+    if [ -z "$CHARACTER_FILE" ]; then
+        log_error "No CHARACTER_FILE provided! Exiting..."
+        exit 1
+    fi
+
+    cd "$(dirname "$0")/eliza" || { log_error "Failed to enter Eliza directory"; exit 1; }
+
+    # Start Eliza and handle errors properly
+    if ! pnpm start --character="characters/$CHARACTER_FILE"; then
+        log_error "Eliza failed to start"
+        exit 1
+    fi
+
+    # Open the browser only if Eliza starts successfully
     if command -v xdg-open >/dev/null 2>&1; then
         xdg-open "http://localhost:5173"
     elif command -v open >/dev/null 2>&1; then
@@ -119,6 +177,7 @@ build_and_start() {
         log_info "Please open http://localhost:5173 in your browser"
     fi
 }
+
 main() {
     install_gum
     show_welcome
@@ -137,6 +196,12 @@ main() {
     setup_node
     clone_repository
     setup_environment
+    log_info "✅ Environment setup complete"
+
+    log_info "🔍 Checking if script is still running..."
+    sleep 2 
+
+    log_info "Starting build and execution..."
     build_and_start
 
     gum style --border double --align center --width 50 --margin "1 2" --padding "1 2" \

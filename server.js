@@ -14,11 +14,9 @@ import { exec } from "child_process";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const ELIZA_DIR = join(process.env.HOME, "documents/eliza-idle/eliza");
-// const CHARACTER_DIR = join(ELIZA_DIR, "characters");
+const ELIZA_DIR = join(process.env.HOME, "/eliza-idle/eliza");
 const CHARACTER_DIR = path.join(
   process.env.HOME,
-  "Documents",
   "eliza-idle",
   "eliza",
   "characters"
@@ -739,14 +737,18 @@ app.post("/generate-character", async (req, res) => {
     const execPromise = util.promisify(exec);
     console.log("Executing script with command:", `bash "${scriptPath}" start`);
 
+    let latestCharacterFile = await getLatestCharacterFile();
+    const characterFileName = path.basename(latestCharacterFile);
+
     const { stdout, stderr } = await execPromise(
-      `bash ${scriptPath} start | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g'`,
+      `CHARACTER_FILE=${characterFileName} bash ${scriptPath} start | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g'`,
       {
         cwd: __dirname,
         env: {
           ...process.env,
           HOME: process.env.HOME,
           PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin`,
+          CHARACTER_FILE: characterFileName,
           FORCE_COLOR: "0",
           NO_COLOR: "1",
           CI: "true",
@@ -762,7 +764,6 @@ app.post("/generate-character", async (req, res) => {
     }
     console.log("Script stdout:", stdout);
 
-    // Verify the script executed successfully
     if (
       !stdout.includes("Installation Complete") &&
       !stdout.includes("Project built successfully")
@@ -770,17 +771,25 @@ app.post("/generate-character", async (req, res) => {
       throw new Error("Script did not complete successfully");
     }
 
-    // Load character data
     const files = await fs.readdir(CHARACTER_DIR);
+    console.log("Files in CHARACTER_DIR:", files);
     const characterFile = files.find((file) => file.endsWith(".json"));
+
     if (!characterFile) {
-      throw new Error("No character file found after script execution");
+      console.error("No character file found in:", CHARACTER_DIR);
+      return res.status(500).json({ error: "Character file not found" });
     }
 
     const characterFilePath = path.join(CHARACTER_DIR, characterFile);
-    const characterData = await fs.readFile(characterFilePath, "utf-8");
-    generatedCharacter = JSON.parse(characterData);
+    const characterJson = await fs.readFile(characterFilePath, "utf-8");
 
+    let generatedCharacter;
+    try {
+      generatedCharacter = JSON.parse(characterJson);
+    } catch (err) {
+      console.error("Error parsing character JSON:", err);
+      return res.status(500).json({ error: "Invalid character JSON format" });
+    }
     res.json({
       message: "Character generated successfully!",
       stdout,
