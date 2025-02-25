@@ -39,10 +39,30 @@ EOF
         "Installation Setup" "" "This script will set up Eliza for you"
 }
 install_dependencies() {
-    gum spin --spinner dot --title "Installing system dependencies..." -- \
-        sudo apt update && sudo apt install -y git curl python3 python3-pip make ffmpeg
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        log_info "Installing system dependencies on macOS..."
+        if ! command -v brew &> /dev/null; then
+            log_error "Homebrew is not installed. Please install it from https://brew.sh/"
+            exit 1
+        fi
+
+        export HOMEBREW_NO_AUTO_UPDATE=1  # Disable auto-update
+
+        # Install only if not already installed
+        for pkg in git curl python3 ffmpeg; do
+            if ! brew list "$pkg" &>/dev/null; then
+                brew install "$pkg" || log_error "Failed to install $pkg"
+            else
+                log_info "$pkg is already installed"
+            fi
+        done
+    else
+        log_info "Installing system dependencies on Linux..."
+        sudo apt update && sudo apt install -y git curl python3 python3-pip make ffmpeg || log_error "Failed to install dependencies"
+    fi
     log_success "Dependencies installed"
 }
+
 install_nvm() {
     if [ ! -d "$HOME/.nvm" ]; then
         gum spin --spinner dot --title "Installing NVM..." -- \
@@ -57,7 +77,11 @@ install_nvm() {
 setup_node() {
     gum spin --spinner dot --title "Setting up Node.js ${NODE_VERSION}..." -- \
         nvm install "${NODE_VERSION}" && nvm alias eliza "${NODE_VERSION}" && nvm use eliza
-    gum spin --spinner dot --title "Installing pnpm..." -- npm install -g pnpm
+    if ! command -v pnpm &> /dev/null; then
+        gum spin --spinner dot --title "Installing pnpm..." -- npm install -g pnpm
+    else
+        log_info "pnpm is already installed"
+    fi
     log_success "Node.js and pnpm setup complete"
 }
 clone_repository() {
@@ -99,9 +123,13 @@ main() {
     install_gum
     show_welcome
     
-    if ! gum confirm "Ready to install Eliza?"; then
+    if [[ -z "$CI" ]]; then
+        if ! gum confirm "Ready to install Eliza?"; then
         log_info "Installation cancelled"
         exit 0
+    fi
+    else
+        log_info "Skipping confirmation in CI mode"
     fi
 
     install_dependencies

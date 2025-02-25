@@ -607,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
     generateFromPromptBtn.disabled = true;
 
     try {
-      const data = await apiCall("/api/generate-prompt-character", {
+      const data = await apiCall("/generate-prompt-character", {
         method: "POST",
         headers: {
           "X-API-Key": apiKey,

@@ -190,3 +190,73 @@ Eliza is an open-source AI agent.
 [2025-02-24 15:15:14] SUCCESS: Node.js setup complete
 [2025-02-24 15:15:14] INFO: Eliza directory already exists
 [2025-02-24 15:15:14] INFO: Eliza directory already exists
+[H[2JWelcome to
+
+ EEEEEE LL    IIII ZZZZZZZ  AAAA
+ EE     LL     II      ZZ  AA  AA
+ EEEE   LL     II    ZZZ   AAAAAA
+ EE     LL     II   ZZ     AA  AA
+ EEEEEE LLLLL IIII ZZZZZZZ AA  AA
+
+Eliza is an open-source AI agent.
+     Createdby ai16z 2024.
+
+                                                        
+  ╔══════════════════════════════════════════════════╗  
+  ║                                                  ║  
+  ║                Installation Setup                ║  
+  ║                                                  ║  
+  ║      This script will set up Eliza for you       ║  
+  ║                                                  ║  
+  ╚══════════════════════════════════════════════════╝  
+                                                        
+[2025-02-24 16:08:18] INFO: Checking system dependencies...
+[2025-02-24 16:08:18] INFO: Checking system dependencies...
+[2025-02-24 16:08:18] INFO: All dependencies are already installed
+[2025-02-24 16:08:18] INFO: All dependencies are already installed
+[2025-02-24 16:08:18] SUCCESS: Dependencies checked
+[2025-02-24 16:08:18] SUCCESS: Dependencies checked
+[?25l[?2004h [D[2K[?2004l[?25h[?1002l[?1003l[?1006l[2025-02-24 16:08:18] INFO: pnpm is already installed
+[2025-02-24 16:08:18] INFO: pnpm is already installed
+[2025-02-24 16:08:18] INFO: Rebuilding SQLite for current Node.js version...
+[2025-02-24 16:08:18] INFO: Rebuilding SQLite for current Node.js version...
+rebuilt dependencies successfully
+[2025-02-24 16:08:20] SUCCESS: Node.js setup complete
+[2025-02-24 16:08:20] SUCCESS: Node.js setup complete
+[2025-02-24 16:08:20] INFO: Eliza directory already exists
+[2025-02-24 16:08:20] INFO: Eliza directory already exists
+[H[2JWelcome to
+
+ EEEEEE LL    IIII ZZZZZZZ  AAAA
+ EE     LL     II      ZZ  AA  AA
+ EEEE   LL     II    ZZZ   AAAAAA
+ EE     LL     II   ZZ     AA  AA
+ EEEEEE LLLLL IIII ZZZZZZZ AA  AA
+
+Eliza is an open-source AI agent.
+     Createdby ai16z 2024.
+
+                                                        
+  ╔══════════════════════════════════════════════════╗  
+  ║                                                  ║  
+  ║                Installation Setup                ║  
+  ║                                                  ║  
+  ║      This script will set up Eliza for you       ║  
+  ║                                                  ║  
+  ╚══════════════════════════════════════════════════╝  
+                                                        
+[2025-02-24 16:09:22] INFO: Checking system dependencies...
+[2025-02-24 16:09:22] INFO: Checking system dependencies...
+[2025-02-24 16:09:22] INFO: All dependencies are already installed
+[2025-02-24 16:09:22] INFO: All dependencies are already installed
+[2025-02-24 16:09:22] SUCCESS: Dependencies checked
+[2025-02-24 16:09:22] SUCCESS: Dependencies checked
+[?25l[?2004h [D[2K[?2004l[?25h[?1002l[?1003l[?1006l[2025-02-24 16:09:22] INFO: pnpm is already installed
+[2025-02-24 16:09:22] INFO: pnpm is already installed
+[2025-02-24 16:09:22] INFO: Rebuilding SQLite for current Node.js version...
+[2025-02-24 16:09:22] INFO: Rebuilding SQLite for current Node.js version...
+rebuilt dependencies successfully
+[2025-02-24 16:09:24] SUCCESS: Node.js setup complete
+[2025-02-24 16:09:24] SUCCESS: Node.js setup complete
+[2025-02-24 16:09:24] INFO: Eliza directory already exists
+[2025-02-24 16:09:24] INFO: Eliza directory already exists
