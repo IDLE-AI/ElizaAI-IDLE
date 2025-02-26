@@ -115,67 +115,63 @@ setup_environment() {
 
     log_info "🔍 Exiting setup_environment"
 }
-# build_and_start() {
-#     gum spin --spinner dot --title "Installing project dependencies..." -- \
-#         pnpm clean && pnpm install --no-frozen-lockfile
-#     log_success "Dependencies installed"
-
-#     gum spin --spinner dot --title "Building project..." -- pnpm build && pnpm rebuild
-#     log_success "Project built successfully"
-
-#     # log_info "Starting Eliza services..."
-#     # pnpm start & pnpm start:service:all
-#     # sleep 5
-#     log_info "Starting Eliza with character file: $CHARACTER_FILE"
-#     if [ -z "$CHARACTER_FILE" ]; then
-#         log_error "No CHARACTER_FILE provided! Exiting..."
-#         exit 1
-#     fi
-#     cd "$(dirname "$0")/eliza" || { log_error "Failed to enter Eliza directory"; exit 1; }
-#     pnpm start --character="characters/$CHARACTER_FILE" || {
-#     log_error "❌ Eliza failed to start"
-#     exit 1
-
-#     if command -v xdg-open >/dev/null 2>&1; then
-#         xdg-open "http://localhost:5173"
-#     elif command -v open >/dev/null 2>&1; then
-#         open "http://localhost:5173"
-#     else
-#         log_info "Please open http://localhost:5173 in your browser"
-#     fi
-# }
 
 build_and_start() {
-    gum spin --spinner dot --title "Installing project dependencies..." -- \
-        pnpm clean && pnpm install --no-frozen-lockfile
-    log_success "Dependencies installed"
 
-    gum spin --spinner dot --title "Building project..." -- pnpm build && pnpm rebuild
-    log_success "Project built successfully"
-
-    log_info "Starting Eliza with character file: $CHARACTER_FILE"
-
-    if [ -z "$CHARACTER_FILE" ]; then
-        log_error "No CHARACTER_FILE provided! Exiting..."
-        exit 1
-    fi
-
-    cd "$(dirname "$0")/eliza" || { log_error "Failed to enter Eliza directory"; exit 1; }
-
-    # Start Eliza and handle errors properly
-    if ! pnpm start --character="characters/$CHARACTER_FILE"; then
-        log_error "Eliza failed to start"
-        exit 1
-    fi
-
-    # Open the browser only if Eliza starts successfully
-    if command -v xdg-open >/dev/null 2>&1; then
-        xdg-open "http://localhost:5173"
-    elif command -v open >/dev/null 2>&1; then
-        open "http://localhost:5173"
+    if [ -n "$CHARACTER_FILE" ]; then
+        log_info "Using character file: $CHARACTER_FILE"
+        
+        # Check if character file exists
+        if [ ! -f "characters/$CHARACTER_FILE" ]; then
+            log_error "Character file does not exist: characters/$CHARACTER_FILE"
+            
+            # List available character files
+            log_info "Available character files:"
+            ls -la characters/*.json 2>/dev/null || echo "No character files found"
+            exit 1
+        fi
+        
+        # Export the character file path for the app to use
+        export ELIZA_CHARACTER_FILE="characters/$CHARACTER_FILE"
     else
-        log_info "Please open http://localhost:5173 in your browser"
+        log_info "No character file specified, using default"
     fi
+
+    # Start the application
+    log_info "Executing: pnpm start"
+    nohup pnpm start 2> >(grep -v "ExperimentalWarning" >&2)
+    disown
+
+    log_info "Waiting for Eliza to start on port 3000..."
+    for i in {1..60}; do
+        if curl -s --head http://localhost:3000 | grep "200 OK" > /dev/null; then
+            log_success "🎉 Eliza started successfully!"
+            exit 0
+        fi
+
+    # Check if Eliza crashed
+    if ! kill -0 $ELIZA_PID 2>/dev/null; then
+        log_error "❌ Eliza process ($ELIZA_PID) has stopped unexpectedly!"
+        exit 1
+    fi
+
+    sleep 1
+    done
+
+    log_error "❌ Eliza did not start within the expected time!"
+    cat /setup_log.txt  # Show logs to debug
+    exit 1
+
+
+
+    # # Open the browser only if Eliza starts successfully
+    # if command -v xdg-open >/dev/null 2>&1; then
+    #     xdg-open "http://localhost:5173"
+    # elif command -v open >/dev/null 2>&1; then
+    #     open "http://localhost:5173"
+    # else
+    #     log_info "Please open http://localhost:5173 in your browser"
+    # fi
 }
 
 main() {
