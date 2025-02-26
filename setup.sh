@@ -1,14 +1,21 @@
 #!/bin/bash
+
 set -e
 set -o pipefail
+
+# export TERM=dumb
+export NO_COLOR=1
+export FORCE_COLOR=0
+export CI=true
+
 NVM_VERSION="v0.39.1"
 NODE_VERSION="23.3.0"
 REPO_URL="https://github.com/elizaOS/eliza"
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'
-NC='\033[0m'; BOLD='\033[1m'
-log_error() { gum style --foreground 1 "❌ ${1}"; }
-log_success() { gum style --foreground 2 "✅ ${1}"; }
-log_info() { gum style --foreground 4 "ℹ️  ${1}"; }
+
+log_error() { echo "❌ ${1}"; }
+log_success() { echo "✅ ${1}"; }
+log_info() { echo "ℹ️  ${1}"; }
+
 handle_error() { 
     log_error "Error occurred in: $1 (Exit Code: $2)"
     echo "🔴 Error in: $1 (Exit Code: $2)" >> /tmp/eliza-setup.log
@@ -27,7 +34,7 @@ install_gum() {
     fi
 }
 show_welcome() {
-    clear
+    # clear
     cat << "EOF"
 Welcome to
 
@@ -116,8 +123,16 @@ setup_environment() {
     log_info "🔍 Exiting setup_environment"
 }
 
-build_and_start() {
+# clean_output() {
+#     # Remove ANSI escape sequences
+#     echo "$1" | sed -r "s/\x1B\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]//g"
+# }
 
+build_and_start() {
+    clean_output() {
+        # Remove ANSI escape sequences
+        echo "$1" | sed -r "s/\x1B\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]//g"
+    }
     if [ -n "$CHARACTER_FILE" ]; then
         log_info "Using character file: $CHARACTER_FILE"
         
@@ -149,31 +164,19 @@ build_and_start() {
             exit 0
         fi
 
-    # Check if Eliza crashed
-    if ! kill -0 $ELIZA_PID 2>/dev/null; then
-        log_error "❌ Eliza process ($ELIZA_PID) has stopped unexpectedly!"
-        exit 1
-    fi
+        # Check if Eliza crashed
+        if ! kill -0 $ELIZA_PID 2>/dev/null; then
+            log_error "❌ Eliza process ($ELIZA_PID) has stopped unexpectedly!"
+            exit 1
+        fi
 
-    sleep 1
+        sleep 1
     done
 
     log_error "❌ Eliza did not start within the expected time!"
     cat /setup_log.txt  # Show logs to debug
     exit 1
-
-
-
-    # # Open the browser only if Eliza starts successfully
-    # if command -v xdg-open >/dev/null 2>&1; then
-    #     xdg-open "http://localhost:5173"
-    # elif command -v open >/dev/null 2>&1; then
-    #     open "http://localhost:5173"
-    # else
-    #     log_info "Please open http://localhost:5173 in your browser"
-    # fi
 }
-
 main() {
     install_gum
     show_welcome

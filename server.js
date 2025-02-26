@@ -9,7 +9,7 @@ import fetch from "node-fetch";
 import path from "path";
 import util from "util";
 import { join } from "path";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import dotenv from "dotenv";
 import os from "os";
 
@@ -709,134 +709,64 @@ Output the refined character data as a single JSON object following the exact te
 });
 let generatedCharacter = null;
 
-// app.post("/generate-character", async (req, res) => {
-//   const scriptPath = path.join(__dirname, "setup.sh");
+async function startEliza(latestCharacterFile) {
+  return new Promise((resolve, reject) => {
+    const scriptPath = path.join(__dirname, "setup.sh");
 
-//   try {
-//     let latestCharacterFile = await getLatestCharacterFile();
+    console.log(
+      "👋🏻 Executing script with spawn:",
+      `CHARACTER_FILE=${latestCharacterFile} bash "${scriptPath}" start-background`
+    );
 
-//     if (!latestCharacterFile) {
-//       return res.status(400).json({ error: "No character files found" });
-//     }
-//   } catch (error) {
-//     console.error("Error getting latest character file:", error);
-//     return res
-//       .status(500)
-//       .json({ error: "Failed to get latest character file" });
-//   }
-//   try {
-//     await fs.mkdir(CHARACTER_DIR, { recursive: true });
+    const child = spawn("bash", [scriptPath, "start-background"], {
+      cwd: __dirname,
+      env: {
+        ...process.env,
+        CHARACTER_FILE: latestCharacterFile,
+        HOME: process.env.HOME,
+        PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin`,
+        TERM: "dumb",
+        FORCE_COLOR: "1",
+        NO_COLOR: "1",
+        CI: "true",
+        DEBUG: "true",
+      },
+      detached: true, // Run independently of parent process
+      stdio: ["ignore", "pipe", "pipe"], // Ignore stdin, pipe stdout/stderr
+    });
 
-//     await fs.access(scriptPath).catch(() => {
-//       throw new Error(`Setup script not found at: ${scriptPath}`);
-//     });
+    let stdoutData = "";
+    let stderrData = "";
 
-//     await fs.chmod(scriptPath, "755");
+    child.stdout.on("data", (data) => {
+      stdoutData += data.toString();
+      console.log(`📜 STDOUT: ${data.toString()}`);
+    });
 
-//     const execPromise = util.promisify(exec);
-//     console.log(
-//       "👋🏻 Executing script with command:",
-//       `bash "${scriptPath}" start`
-//     );
+    child.stderr.on("data", (data) => {
+      stderrData += data.toString();
+      console.error(`🚨 STDERR: ${data.toString()}`);
+    });
 
-//     let latestCharacterFile = await getLatestCharacterFile();
-//     console.log("🔍 Latest Character File:", latestCharacterFile);
+    child.on("close", (code) => {
+      if (code === 0) {
+        console.log("✅ Eliza started successfully!");
+        resolve({ stdout: stdoutData, stderr: stderrData });
+      } else {
+        console.error(`❌ Eliza exited with code ${code}`);
+        reject(new Error(`Script exited with code ${code}\n${stderrData}`));
+      }
+    });
 
-//     const characterFileName = path.basename(latestCharacterFile);
-
-//     console.log("✅ Character file path:", characterFileName);
-
-//     const { stdout, stderr } = await execPromise(
-//       `bash ${scriptPath} start | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g'`,
-//       {
-//         cwd: __dirname,
-//         env: {
-//           ...process.env,
-//           CHARACTER_FILE: characterFileName,
-//           HOME: process.env.HOME,
-//           PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin`,
-//           FORCE_COLOR: "0",
-//           NO_COLOR: "1",
-//           CI: "true",
-//           DEBUG: "true",
-//         },
-//         timeout: 180000,
-//         maxBuffer: 1024 * 1024 * 10,
-//       }
-//     );
-
-//     if (stderr) {
-//       console.error("Script stderr:", stderr);
-//     }
-//     console.log("Script stdout:", stdout);
-
-//     if (
-//       !stdout.includes("Installation Complete") &&
-//       !stdout.includes("Project built successfully")
-//     ) {
-//       throw new Error("Script did not complete successfully");
-//     }
-
-//     const files = await fs.readdir(CHARACTER_DIR);
-//     console.log("Files in CHARACTER_DIR:", files);
-//     const characterFile = files.find((file) => file.endsWith(".json"));
-
-//     if (!characterFile) {
-//       console.error("No character file found in:", CHARACTER_DIR);
-//       return res.status(500).json({ error: "Character file not found" });
-//     }
-
-//     const characterFilePath = path.join(CHARACTER_DIR, characterFile);
-//     const characterJson = await fs.readFile(characterFilePath, "utf-8");
-
-//     let generatedCharacter;
-//     try {
-//       generatedCharacter = JSON.parse(characterJson);
-//     } catch (err) {
-//       console.error("Error parsing character JSON:", err);
-//       return res.status(500).json({ error: "Invalid character JSON format" });
-//     }
-//     res.json({
-//       message: "Character generated successfully!",
-//       stdout,
-//       character: generatedCharacter,
-//     });
-//   } catch (error) {
-//     console.error("Script execution error:", {
-//       message: error.message,
-//       stdout: error.stdout,
-//       stderr: error.stderr,
-//       code: error.code,
-//     });
-
-//     return res.status(500).json({
-//       error: "Script execution failed",
-//       details: error.message,
-//       stdout: error.stdout,
-//       stderr: error.stderr,
-//     });
-//   }
-// });
+    child.unref();
+  });
+}
 
 app.post("/generate-character", async (req, res) => {
-  const scriptPath = path.join(__dirname, "setup.sh");
-
   try {
     console.log("🔍 Ensuring character directory exists...");
     await fs.mkdir(CHARACTER_DIR, { recursive: true });
 
-    // Ensure setup script exists
-    try {
-      await fs.access(scriptPath);
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Setup script not found at: " + scriptPath });
-    }
-
-    await fs.chmod(scriptPath, "755");
-
-    // Retrieve latest character file
     let latestCharacterFile;
     try {
       const files = await fs.readdir(CHARACTER_DIR);
@@ -865,30 +795,11 @@ app.post("/generate-character", async (req, res) => {
         .json({ error: "Failed to get latest character file" });
     }
 
-    const execPromise = util.promisify(exec);
-    console.log(
-      "👋🏻 Executing script with character file:",
-      latestCharacterFile
-    );
+    console.log("👋🏻 Starting Eliza with character file:", latestCharacterFile);
+    const { stdout, stderr } = await startEliza(latestCharacterFile);
 
-    const { stdout, stderr } = await execPromise(
-      `CHARACTER_FILE=${latestCharacterFile} bash "${scriptPath}" start-background`,
-      {
-        cwd: __dirname,
-        env: {
-          ...process.env,
-          CHARACTER_FILE: latestCharacterFile,
-          HOME: process.env.HOME,
-          PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin`,
-          FORCE_COLOR: "0",
-          NO_COLOR: "1",
-          CI: "true",
-          DEBUG: "true",
-        },
-        timeout: 60000,
-        maxBuffer: 1024 * 1024 * 10,
-      }
-    );
+    const cleanOutput = (output) =>
+      output.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "").trim();
 
     const filteredStderr = stderr
       .split("\n")
@@ -902,35 +813,9 @@ app.post("/generate-character", async (req, res) => {
       .join("\n");
 
     if (filteredStderr.trim()) {
-      console.error("Script stderr (filtered):", filteredStderr);
+      console.error("Script stderr (filtered):", cleanOutput(filteredStderr));
     } else {
       console.log("Script only had harmless warnings in stderr");
-    }
-
-    if (stderr && filteredStderr.trim()) {
-      console.error("Script stderr:", filteredStderr);
-    } else {
-      console.log("Ignoring harmless stderr warnings.");
-    }
-
-    // If stdout shows Eliza started successfully, don't throw an error
-    if (stdout.includes("Chat started") || stdout.includes("Server running")) {
-      console.log("Eliza started successfully!");
-    } else {
-      throw new Error("Eliza did not start successfully");
-    }
-
-    if (stderr && filteredStderr.trim()) {
-      console.error("Script stderr:", filteredStderr);
-    } else {
-      console.log("Ignoring harmless stderr warnings.");
-    }
-
-    // If stdout shows Eliza started successfully, don't throw an error
-    if (stdout.includes("Chat started") || stdout.includes("Server running")) {
-      console.log("Eliza started successfully!");
-    } else {
-      throw new Error("Eliza did not start successfully");
     }
 
     console.log("⌛ Waiting for Eliza to start on port 3000...");
@@ -947,7 +832,6 @@ app.post("/generate-character", async (req, res) => {
       } catch (error) {
         console.warn("⏳ Eliza not ready yet, retrying...");
       }
-
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
@@ -960,7 +844,6 @@ app.post("/generate-character", async (req, res) => {
       });
     }
 
-    // Read character file
     const characterFilePath = path.join(CHARACTER_DIR, latestCharacterFile);
     const characterJson = await fs.readFile(characterFilePath, "utf-8");
 
@@ -994,6 +877,186 @@ app.post("/generate-character", async (req, res) => {
     });
   }
 });
+// app.post("/generate-character", async (req, res) => {
+//   const scriptPath = path.join(__dirname, "setup.sh");
+
+//   try {
+//     console.log("🔍 Ensuring character directory exists...");
+//     await fs.mkdir(CHARACTER_DIR, { recursive: true });
+
+//     // Ensure setup script exists
+//     try {
+//       await fs.access(scriptPath);
+//     } catch (error) {
+//       return res
+//         .status(500)
+//         .json({ error: "Setup script not found at: " + scriptPath });
+//     }
+
+//     await fs.chmod(scriptPath, "755");
+
+//     // Retrieve latest character file
+//     let latestCharacterFile;
+//     try {
+//       const files = await fs.readdir(CHARACTER_DIR);
+//       const jsonFiles = files.filter((file) => file.endsWith(".json"));
+
+//       if (jsonFiles.length === 0) {
+//         return res.status(400).json({ error: "No character files found" });
+//       }
+
+//       const fileStats = await Promise.all(
+//         jsonFiles.map(async (file) => {
+//           const filePath = path.join(CHARACTER_DIR, file);
+//           const stats = await fs.stat(filePath);
+//           return { file, mtime: stats.mtime };
+//         })
+//       );
+
+//       fileStats.sort((a, b) => b.mtime - a.mtime);
+//       latestCharacterFile = fileStats[0].file;
+
+//       console.log("✅ Latest Character File:", latestCharacterFile);
+//     } catch (error) {
+//       console.error("❌ Error retrieving latest character file:", error);
+//       return res
+//         .status(500)
+//         .json({ error: "Failed to get latest character file" });
+//     }
+
+//     const execPromise = util.promisify(exec);
+//     console.log(
+//       "👋🏻 Executing script with character file:",
+//       latestCharacterFile
+//     );
+
+//     const cleanOutput = (output) =>
+//       output.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "").trim();
+
+//     const { stdout, stderr } = await execPromise(
+//       `CHARACTER_FILE=${latestCharacterFile} bash "${scriptPath}" start-background`,
+//       {
+//         cwd: __dirname,
+//         env: {
+//           ...process.env,
+//           CHARACTER_FILE: latestCharacterFile,
+//           HOME: process.env.HOME,
+//           PATH: `${process.env.PATH}:/usr/local/bin:/opt/homebrew/bin`,
+//           TERM: "dumb",
+//           FORCE_COLOR: "1",
+//           NO_COLOR: "1",
+//           CI: "true",
+//           DEBUG: "true",
+//         },
+//         timeout: 60000,
+//         maxBuffer: 1024 * 1024 * 10,
+//       }
+//     );
+//     console.log("Script stdout:", cleanOutput(stdout));
+//     const filteredStderr = stderr
+//       .split("\n")
+//       .filter(
+//         (line) =>
+//           !line.includes("ExperimentalWarning") &&
+//           !line.includes("DeprecationWarning") &&
+//           !line.includes("trace-warnings") &&
+//           !line.includes("trace-deprecation")
+//       )
+//       .join("\n");
+
+//     if (filteredStderr.trim()) {
+//       console.error("Script stderr (filtered):", cleanOutput(filteredStderr));
+//     } else {
+//       console.log("Script only had harmless warnings in stderr");
+//     }
+
+//     if (stderr && filteredStderr.trim()) {
+//       console.error("Script stderr:", cleanOutput(filteredStderr));
+//     } else {
+//       console.log("Ignoring harmless stderr warnings.");
+//     }
+
+//     // If stdout shows Eliza started successfully, don't throw an error
+//     if (stdout.includes("Chat started") || stdout.includes("Server running")) {
+//       console.log("Eliza started successfully!");
+//     } else {
+//       throw new Error("Eliza did not start successfully");
+//     }
+
+//     if (stderr && filteredStderr.trim()) {
+//       console.error("Script stderr:", filteredStderr);
+//     } else {
+//       console.log("Ignoring harmless stderr warnings.");
+//     }
+
+//     // If stdout shows Eliza started successfully, don't throw an error
+//     if (stdout.includes("Chat started") || stdout.includes("Server running")) {
+//       console.log("Eliza started successfully!");
+//     } else {
+//       throw new Error("Eliza did not start successfully");
+//     }
+
+//     console.log("⌛ Waiting for Eliza to start on port 3000...");
+//     let elizaStarted = false;
+
+//     for (let i = 0; i < 10; i++) {
+//       try {
+//         const response = await fetch("http://localhost:3000");
+//         if (response.ok) {
+//           elizaStarted = true;
+//           console.log("🎉 Eliza started successfully!");
+//           break;
+//         }
+//       } catch (error) {
+//         console.warn("⏳ Eliza not ready yet, retrying...");
+//       }
+
+//       await new Promise((resolve) => setTimeout(resolve, 1000));
+//     }
+
+//     if (!elizaStarted) {
+//       console.warn("⚠️ Eliza may not have started successfully. Check logs.");
+//       return res.status(500).json({
+//         error: "Eliza did not start within the expected time",
+//         stdout,
+//         stderr,
+//       });
+//     }
+
+//     // Read character file
+//     const characterFilePath = path.join(CHARACTER_DIR, latestCharacterFile);
+//     const characterJson = await fs.readFile(characterFilePath, "utf-8");
+
+//     let generatedCharacter;
+//     try {
+//       generatedCharacter = JSON.parse(characterJson);
+//     } catch (err) {
+//       console.error("❌ Error parsing character JSON:", err);
+//       return res.status(500).json({ error: "Invalid character JSON format" });
+//     }
+
+//     return res.json({
+//       message: "Character generated and Eliza started successfully!",
+//       status: "success",
+//       stdout,
+//       character: generatedCharacter,
+//     });
+//   } catch (error) {
+//     console.error("❌ Script execution error:", {
+//       message: error.message,
+//       stdout: error.stdout,
+//       stderr: error.stderr,
+//       code: error.code,
+//     });
+
+//     return res.status(500).json({
+//       error: "Script execution failed",
+//       details: error.message,
+//       stdout: error.stdout,
+//       stderr: error.stderr,
+//     });
+//   }
+// });
 
 app.get("/api/get-generated-character", (req, res) => {
   if (generatedCharacter) {
