@@ -152,12 +152,16 @@ build_and_start() {
         log_info "No character file specified, using default"
     fi
 
+    export PATH="$HOME/.local/bin:$PATH"
+    export PNPM_HOME="$HOME/.pnpm-global"
+    export PATH="$PNPM_HOME/bin:$PATH"
     # Start the application
     log_info "Executing: pnpm start"
-    nohup pnpm start 2> >(grep -v "ExperimentalWarning" >&2)
+    nohup pnpm start 2> >(grep -v "ExperimentalWarning" >&2) 
     disown
 
     log_info "Waiting for Eliza to start on port 3000..."
+
     for i in {1..60}; do
         if curl -s --head http://localhost:3000 | grep "200 OK" > /dev/null; then
             log_success "🎉 Eliza started successfully!"
@@ -172,6 +176,15 @@ build_and_start() {
 
         sleep 1
     done
+
+    if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "http://localhost:3000"
+    elif command -v open >/dev/null 2>&1; then
+        open "http://localhost:3000"
+    else
+        log_info "Please open http://localhost:3000 in your browser"
+    fi
+    
 
     log_error "❌ Eliza did not start within the expected time!"
     cat /setup_log.txt  # Show logs to debug

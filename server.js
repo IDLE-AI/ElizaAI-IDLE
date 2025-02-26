@@ -707,6 +707,7 @@ Output the refined character data as a single JSON object following the exact te
       .json({ error: error.message || "Failed to refine character" });
   }
 });
+
 let generatedCharacter = null;
 
 async function startEliza(latestCharacterFile) {
@@ -748,14 +749,32 @@ async function startEliza(latestCharacterFile) {
       console.error(`🚨 STDERR: ${data.toString()}`);
     });
 
+    child.on("error", (err) => {
+      console.error("🔥 Spawn Error:", err);
+      reject(err);
+    });
+
     child.on("close", (code) => {
-      if (code === 0) {
-        console.log("✅ Eliza started successfully!");
-        resolve({ stdout: stdoutData, stderr: stderrData });
-      } else {
-        console.error(`❌ Eliza exited with code ${code}`);
-        reject(new Error(`Script exited with code ${code}\n${stderrData}`));
-      }
+      setTimeout(() => {
+        // Wait a bit before resolving
+        if (
+          code === 0 ||
+          stdoutData.includes("Chat started") ||
+          stdoutData.includes("Server running")
+        ) {
+          console.log("✅ Eliza started successfully!");
+          resolve({ stdout: stdoutData, stderr: stderrData });
+        } else {
+          console.error(`❌ Eliza exited with code ${code}`);
+          reject(
+            new Error(
+              `Script exited with code ${code}\n${
+                stderrData || "No stderr available"
+              }`
+            )
+          );
+        }
+      }, 2000);
     });
 
     child.unref();
