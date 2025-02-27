@@ -21,13 +21,7 @@ const __dirname = dirname(__filename);
 console.log("User home:", os.homedir());
 
 const ELIZA_DIR = join(process.env.HOME, "/eliza-idle/eliza");
-const CHARACTER_DIR = path.join(
-  process.env.HOME,
-  "eliza-idle",
-  "eliza",
-  "characters"
-);
-
+const CHARACTER_DIR = path.join(__dirname, "eliza", "characters");
 const app = express();
 app.use(express.json());
 
@@ -47,15 +41,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Middleware order is important
 app.use(cors(corsOptions));
 app.use(express.static(__dirname));
-app.use(express.json({ limit: "50mb" })); // Move this up before routes
+app.use(express.json({ limit: "50mb" }));
 
-// Add OPTIONS handler for preflight requests
 app.options("*", cors(corsOptions));
 
-// Ensure uploads directory exists
 await fs.mkdir("uploads", { recursive: true }).catch(console.error);
 
 const getLatestCharacterFile = async () => {
@@ -67,7 +58,7 @@ const getLatestCharacterFile = async () => {
 
     const fileStats = await Promise.all(
       jsonFiles.map(async (file) => ({
-        name: file,
+        name: file.replace(".json", ""),
         stats: await fs.stat(path.join(CHARACTER_DIR, file)),
       }))
     );
@@ -75,7 +66,8 @@ const getLatestCharacterFile = async () => {
     const latestFile = fileStats.sort(
       (a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime()
     )[0];
-    return latestFile ? path.join(CHARACTER_DIR, latestFile.name) : null;
+
+    return latestFile ? latestFile.name : null;
   } catch (err) {
     console.error("Error getting latest character file:", err);
     return null;
@@ -838,32 +830,6 @@ app.post("/generate-character", async (req, res) => {
       console.log("Script only had harmless warnings in stderr");
     }
 
-    // console.log("⌛ Waiting for Eliza to start on port 3000...");
-    // let elizaStarted = false;
-
-    // for (let i = 0; i < 10; i++) {
-    //   try {
-    //     const response = await fetch("http://localhost:3000");
-    //     if (response.ok) {
-    //       elizaStarted = true;
-    //       console.log("🎉 Eliza started successfully!");
-    //       break;
-    //     }
-    //   } catch (error) {
-    //     console.warn("⏳ Eliza not ready yet, retrying...");
-    //   }
-    //   await new Promise((resolve) => setTimeout(resolve, 1000));
-    // }
-
-    // if (!elizaStarted) {
-    //   console.warn("⚠️ Eliza may not have started successfully. Check logs.");
-    //   return res.status(500).json({
-    //     error: "Eliza did not start within the expected time",
-    //     stdout,
-    //     stderr,
-    //   });
-    // }
-
     const characterFilePath = path.join(CHARACTER_DIR, latestCharacterFile);
     const characterJson = await fs.readFile(characterFilePath, "utf-8");
 
@@ -898,10 +864,78 @@ app.post("/generate-character", async (req, res) => {
   }
 });
 
+// app.post("/start-agent", async (req, res) => {
+//   console.log("🚀 Received request to start Eliza");
+
+//   const characterName = req.body.character || "Idle";
+//   const scriptPath = path.join(__dirname, "start_eliza.sh");
+
+//   try {
+//     await fs.access(scriptPath);
+//   } catch (error) {
+//     return res.status(500).json({ error: "❌ start_eliza.sh not found!" });
+//   }
+
+//   console.log(`👋🏻 Starting Eliza with character file: ${characterName}`);
+
+//   const child = spawn("bash", [scriptPath, characterName], {
+//     cwd: __dirname,
+//     detached: true,
+//     stdio: ["pipe", "pipe", "pipe"], // Allow stdin, stdout, stderr
+//   });
+
+//   let stdoutData = "";
+//   let stderrData = "";
+
+//   child.stdout.on("data", (data) => {
+//     stdoutData += data.toString();
+//     console.log(`📜 STDOUT: ${data.toString()}`);
+//   });
+
+//   child.stderr.on("data", (data) => {
+//     stderrData += data.toString();
+//     console.error(`🚨 STDERR: ${data.toString()}`);
+//   });
+
+//   child.on("error", (err) => {
+//     console.error("🔥 Spawn Error:", err);
+//     res.status(500).json({ error: err.message });
+//   });
+
+//   child.on("close", (code) => {
+//     console.log(`❌ Eliza exited with code ${code}`);
+//   });
+
+//   // Create a readline interface to capture user input
+//   const rl = readline.createInterface({
+//     input: process.stdin,
+//     output: process.stdout,
+//   });
+
+//   rl.on("line", (input) => {
+//     if (input.trim().toLowerCase() === "exit") {
+//       console.log("🛑 Stopping Eliza...");
+//       child.kill("SIGTERM"); // Gracefully terminate the child process
+//       rl.close();
+//     } else {
+//       child.stdin.write(input + "\n"); // Send user input to Eliza
+//     }
+//   });
+
+//   res.json({ success: true, message: "Eliza started successfully!" });
+// });
+
 app.post("/start-agent", async (req, res) => {
   console.log("🚀 Received request to start Eliza");
 
-  const characterName = req.body.character || "Idle";
+  const latestCharacterFile = await getLatestCharacterFile();
+
+  if (!latestCharacterFile) {
+    return res.status(500).json({ error: "❌ No character file found!" });
+  }
+
+  console.log(`👋🏻 Starting Eliza with character file: ${latestCharacterFile}`);
+
   const scriptPath = path.join(__dirname, "start_eliza.sh");
 
   try {
@@ -910,9 +944,7 @@ app.post("/start-agent", async (req, res) => {
     return res.status(500).json({ error: "❌ start_eliza.sh not found!" });
   }
 
-  console.log(`👋🏻 Starting Eliza with character file: ${characterName}`);
-
-  const child = spawn("bash", [scriptPath, characterName], {
+  const child = spawn("bash", [scriptPath, latestCharacterFile], {
     cwd: __dirname,
     detached: true,
     stdio: ["pipe", "pipe", "pipe"], // Allow stdin, stdout, stderr
@@ -940,7 +972,7 @@ app.post("/start-agent", async (req, res) => {
     console.log(`❌ Eliza exited with code ${code}`);
   });
 
-  // Create a readline interface to capture user input
+  // Capture user input
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,

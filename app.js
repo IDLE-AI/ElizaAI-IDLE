@@ -92,7 +92,47 @@ document.addEventListener("DOMContentLoaded", () => {
   // Store files and current character data
   let collectedFiles = [];
   let currentCharacterData = null;
+  const createKnowledgeEntry = (value = "") => {
+    const entry = document.createElement("div");
+    entry.className = "knowledge-entry";
+    entry.innerHTML = `
+              <span class="entry-number"></span>
+              <input type="text" class="knowledge-text" value="${value}" placeholder="Enter knowledge...">
+              <button class="action-button delete-button" title="Remove Knowledge">×</button>
+          `;
 
+    entry.querySelector(".delete-button").addEventListener("click", () => {
+      entry.remove();
+      updateKnowledgeNumbers();
+      updateCurrentKnowledge();
+    });
+
+    entry
+      .querySelector("input")
+      .addEventListener("change", updateCurrentKnowledge);
+    return entry;
+  };
+
+  const updateKnowledgeNumbers = () => {
+    knowledgeEntries
+      .querySelectorAll(".knowledge-entry")
+      .forEach((entry, index) => {
+        entry.querySelector(".entry-number").textContent = `${index + 1}.`;
+      });
+  };
+
+  const updateCurrentKnowledge = () => {
+    if (currentCharacterData) {
+      const knowledgeLines = Array.from(
+        knowledgeEntries.querySelectorAll(".knowledge-text")
+      )
+        .map((input) => input.value.trim())
+        .filter((text) => text.length > 0)
+        .map((text) => (text.endsWith(".") ? text : text + "."));
+
+      currentCharacterData.knowledge = knowledgeLines;
+    }
+  };
   // Helper Functions
   const updateKnowledgeDisplay = (knowledge = []) => {
     if (knowledgeEntries) {
@@ -1038,48 +1078,6 @@ processKnowledgeBtn.addEventListener("click", async () => {
     processKnowledgeBtn.disabled = false;
   }
 });
-
-const createKnowledgeEntry = (value = "") => {
-  const entry = document.createElement("div");
-  entry.className = "knowledge-entry";
-  entry.innerHTML = `
-            <span class="entry-number"></span>
-            <input type="text" class="knowledge-text" value="${value}" placeholder="Enter knowledge...">
-            <button class="action-button delete-button" title="Remove Knowledge">×</button>
-        `;
-
-  entry.querySelector(".delete-button").addEventListener("click", () => {
-    entry.remove();
-    updateKnowledgeNumbers();
-    updateCurrentKnowledge();
-  });
-
-  entry
-    .querySelector("input")
-    .addEventListener("change", updateCurrentKnowledge);
-  return entry;
-};
-
-const updateKnowledgeNumbers = () => {
-  knowledgeEntries
-    .querySelectorAll(".knowledge-entry")
-    .forEach((entry, index) => {
-      entry.querySelector(".entry-number").textContent = `${index + 1}.`;
-    });
-};
-
-const updateCurrentKnowledge = () => {
-  if (currentCharacterData) {
-    const knowledgeLines = Array.from(
-      knowledgeEntries.querySelectorAll(".knowledge-text")
-    )
-      .map((input) => input.value.trim())
-      .filter((text) => text.length > 0)
-      .map((text) => (text.endsWith(".") ? text : text + "."));
-
-    currentCharacterData.knowledge = knowledgeLines;
-  }
-};
 
 // Add knowledge button handler
 addKnowledgeBtn.addEventListener("click", () => {
