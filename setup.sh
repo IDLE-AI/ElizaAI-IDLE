@@ -123,73 +123,61 @@ setup_environment() {
     log_info "🔍 Exiting setup_environment"
 }
 
-# clean_output() {
-#     # Remove ANSI escape sequences
-#     echo "$1" | sed -r "s/\x1B\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]//g"
-# }
-
 build_and_start() {
-    clean_output() {
-        # Remove ANSI escape sequences
-        echo "$1" | sed -r "s/\x1B\[([0-9,A-Z]{1,2}(;[0-9]{1,2})?(;[0-9]{3})?)?[m|K]//g"
-    }
-    if [ -n "$CHARACTER_FILE" ]; then
-        log_info "Using character file: $CHARACTER_FILE"
-        
-        # Check if character file exists
-        if [ ! -f "characters/$CHARACTER_FILE" ]; then
-            log_error "Character file does not exist: characters/$CHARACTER_FILE"
-            
-            # List available character files
-            log_info "Available character files:"
-            ls -la characters/*.json 2>/dev/null || echo "No character files found"
-            exit 1
-        fi
-        
-        # Export the character file path for the app to use
-        export ELIZA_CHARACTER_FILE="characters/$CHARACTER_FILE"
-    else
-        log_info "No character file specified, using default"
-    fi
+    log_info "Preparing to start Eliza on port 3000..."
 
-    export PATH="$HOME/.local/bin:$PATH"
-    export PNPM_HOME="$HOME/.pnpm-global"
-    export PATH="$PNPM_HOME/bin:$PATH"
-    # Start the application
-    log_info "Executing: pnpm start"
-    nohup pnpm start 2> >(grep -v "ExperimentalWarning" >&2) 
-    disown
+    # Ensure `start_eliza.sh` is placed in the correct directory
+    ELIZA_DIR="$(cd "$(dirname "$0")" && pwd)"
+    START_SCRIPT="$ELIZA_DIR/start_eliza.sh"
 
-    log_info "Waiting for Eliza to start on port 3000..."
+    cat > "$START_SCRIPT" << 'EOF'
+#!/bin/bash
 
-    for i in {1..60}; do
-        if curl -s --head http://localhost:3000 | grep "200 OK" > /dev/null; then
-            log_success "🎉 Eliza started successfully!"
-            exit 0
-        fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ELIZA_DIR="$SCRIPT_DIR/eliza"
 
-        # Check if Eliza crashed
-        if ! kill -0 $ELIZA_PID 2>/dev/null; then
-            log_error "❌ Eliza process ($ELIZA_PID) has stopped unexpectedly!"
-            exit 1
-        fi
-
-        sleep 1
-    done
-
-    if command -v xdg-open >/dev/null 2>&1; then
-        xdg-open "http://localhost:3000"
-    elif command -v open >/dev/null 2>&1; then
-        open "http://localhost:3000"
-    else
-        log_info "Please open http://localhost:3000 in your browser"
-    fi
-    
-
-    log_error "❌ Eliza did not start within the expected time!"
-    cat /setup_log.txt  # Show logs to debug
+if [ ! -d "$ELIZA_DIR" ]; then
+    echo "❌ Eliza directory not found at $ELIZA_DIR"
     exit 1
+fi
+
+cd "$ELIZA_DIR" || exit 1
+export PORT=3000
+echo "✅ Starting Eliza in $ELIZA_DIR on port $PORT..."
+pnpm start
+EOF
+
+    chmod +x "$START_SCRIPT"
+
+    log_info "Starting Eliza with dedicated script..."
+    "$START_SCRIPT" &
+
+    # Wait a moment to ensure process starts
+    sleep 5
+
+    # Check if Eliza is running on port 3000
+    if curl -s --head http://localhost:3000 | grep "200 OK" > /dev/null; then
+        log_success "🎉 Eliza started successfully on port 3000!"
+        
+        # Try to open in browser
+        if command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "http://localhost:3000"
+        elif command -v open >/dev/null 2>&1; then
+            open "http://localhost:3000"
+        else
+            log_info "Please open http://localhost:3000 in your browser"
+        fi
+        
+        log_info "Eliza is running in the background. To stop it, find and kill the process."
+        exit 0
+    else
+        log_error "❌ Eliza did not start properly on port 3000."
+        log_info "Try running Eliza manually: cd eliza && PORT=3000 pnpm start"
+        exit 1
+    fi
 }
+
+
 main() {
     install_gum
     show_welcome

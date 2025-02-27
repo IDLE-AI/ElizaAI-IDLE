@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const characterPrompt = document.getElementById("character-prompt");
   const generateCharacterBtn = document.getElementById("generate-character");
   const characterDisplay = document.getElementById("character-display");
+  const startAgentBtn = document.getElementById("start-agent");
   const generateFromPromptBtn = document.getElementById("generate-from-prompt");
   const promptStatus = document.getElementById("prompt-status");
   const processingStatus = document.getElementById("processing-status");
@@ -672,6 +673,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   checkSavedApiKey();
   addExampleBtn.click();
+
+  startAgentBtn.addEventListener("click", async () => {
+    try {
+      const response = await fetch("/start-agent", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        alert("Agent started successfully!");
+      }
+    } catch (error) {
+      console.error("Error starting agent:", error);
+      alert("Error starting agent.");
+    }
+  });
 
   async function fetchGeneratedCharacter() {
     try {
