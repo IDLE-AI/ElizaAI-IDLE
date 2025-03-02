@@ -49,31 +49,6 @@ app.options("*", cors(corsOptions));
 
 await fs.mkdir("uploads", { recursive: true }).catch(console.error);
 
-const getLatestCharacterFile = async () => {
-  try {
-    const files = await fs.readdir(CHARACTER_DIR);
-    const jsonFiles = files.filter((file) => file.endsWith(".json"));
-
-    if (jsonFiles.length === 0) return null;
-
-    const fileStats = await Promise.all(
-      jsonFiles.map(async (file) => ({
-        name: file.replace(".json", ""),
-        stats: await fs.stat(path.join(CHARACTER_DIR, file)),
-      }))
-    );
-
-    const latestFile = fileStats.sort(
-      (a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime()
-    )[0];
-
-    return latestFile ? latestFile.name : null;
-  } catch (err) {
-    console.error("Error getting latest character file:", err);
-    return null;
-  }
-};
-
 app.post("/save-json", async (req, res) => {
   try {
     const characterData = req.body;
@@ -702,6 +677,30 @@ Output the refined character data as a single JSON object following the exact te
   }
 });
 
+const getLatestCharacterFile = async () => {
+  try {
+    const files = await fs.readdir(CHARACTER_DIR);
+    const jsonFiles = files.filter((file) => file.endsWith(".json"));
+
+    if (jsonFiles.length === 0) return null;
+
+    const fileStats = await Promise.all(
+      jsonFiles.map(async (file) => ({
+        name: file.replace(".json", ""),
+        stats: await fs.stat(path.join(CHARACTER_DIR, file)),
+      }))
+    );
+
+    const latestFile = fileStats.sort(
+      (a, b) => b.stats.mtime.getTime() - a.stats.mtime.getTime()
+    )[0];
+
+    return latestFile ? latestFile.name : null;
+  } catch (err) {
+    console.error("Error getting latest character file:", err);
+    return null;
+  }
+};
 let generatedCharacter = null;
 
 async function startEliza(latestCharacterFile) {
@@ -726,8 +725,8 @@ async function startEliza(latestCharacterFile) {
         CI: "true",
         DEBUG: "true",
       },
-      detached: true, // Run independently of parent process
-      stdio: ["ignore", "pipe", "pipe"], // Ignore stdin, pipe stdout/stderr
+      detached: true,
+      stdio: ["ignore", "pipe", "pipe"],
     });
 
     let stdoutData = "";
@@ -864,67 +863,6 @@ app.post("/generate-character", async (req, res) => {
   }
 });
 
-// app.post("/start-agent", async (req, res) => {
-//   console.log("🚀 Received request to start Eliza");
-
-//   const characterName = req.body.character || "Idle";
-//   const scriptPath = path.join(__dirname, "start_eliza.sh");
-
-//   try {
-//     await fs.access(scriptPath);
-//   } catch (error) {
-//     return res.status(500).json({ error: "❌ start_eliza.sh not found!" });
-//   }
-
-//   console.log(`👋🏻 Starting Eliza with character file: ${characterName}`);
-
-//   const child = spawn("bash", [scriptPath, characterName], {
-//     cwd: __dirname,
-//     detached: true,
-//     stdio: ["pipe", "pipe", "pipe"], // Allow stdin, stdout, stderr
-//   });
-
-//   let stdoutData = "";
-//   let stderrData = "";
-
-//   child.stdout.on("data", (data) => {
-//     stdoutData += data.toString();
-//     console.log(`📜 STDOUT: ${data.toString()}`);
-//   });
-
-//   child.stderr.on("data", (data) => {
-//     stderrData += data.toString();
-//     console.error(`🚨 STDERR: ${data.toString()}`);
-//   });
-
-//   child.on("error", (err) => {
-//     console.error("🔥 Spawn Error:", err);
-//     res.status(500).json({ error: err.message });
-//   });
-
-//   child.on("close", (code) => {
-//     console.log(`❌ Eliza exited with code ${code}`);
-//   });
-
-//   // Create a readline interface to capture user input
-//   const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout,
-//   });
-
-//   rl.on("line", (input) => {
-//     if (input.trim().toLowerCase() === "exit") {
-//       console.log("🛑 Stopping Eliza...");
-//       child.kill("SIGTERM"); // Gracefully terminate the child process
-//       rl.close();
-//     } else {
-//       child.stdin.write(input + "\n"); // Send user input to Eliza
-//     }
-//   });
-
-//   res.json({ success: true, message: "Eliza started successfully!" });
-// });
-
 app.post("/start-agent", async (req, res) => {
   console.log("🚀 Received request to start Eliza");
 
@@ -991,21 +929,29 @@ app.post("/start-agent", async (req, res) => {
   res.json({ success: true, message: "Eliza started successfully!" });
 });
 
-app.get("/get-generated-character", (req, res) => {
-  if (generatedCharacter) {
-    res.json({ character: generatedCharacter });
-  } else {
-    res.status(404).json({ error: "No character generated yet" });
+app.post("/chat", async (req, res) => {
+  const { walletAddress, contractAddress, message } = req.body;
+
+  if (!walletAddress || !contractAddress || !message) {
+    return res.status(400).json({ error: "Missing required parameters" });
+  }
+
+  try {
+    const characterData = await fs.readFile(CHARACTER_FILE, "utf-8");
+    const savedCharacter = JSON.parse(characterData);
+
+    const responseMessage = `Character ${savedCharacter.name} received: ${message}`;
+
+    res.json({
+      character: savedCharacter,
+      response: responseMessage,
+    });
+  } catch (error) {
+    console.error("Error retrieving character data:", error);
+    res.status(500).json({ error: "Failed to process chat message" });
   }
 });
-const PORT = process.env.PORT || 4001;
-const HOST = process.env.HOST || "0.0.0.0";
 
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
-});
-
-// Update the error handling middleware at the bottom
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   return sendJsonResponse(res.status(500), {
@@ -1014,7 +960,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Add this catch-all middleware for unhandled routes
 app.use((req, res) => {
   return sendJsonResponse(res.status(404), {
     error: "Not Found",
