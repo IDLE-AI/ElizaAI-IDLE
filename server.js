@@ -701,6 +701,7 @@ const getLatestCharacterFile = async () => {
     return null;
   }
 };
+
 let generatedCharacter = null;
 
 async function startEliza(latestCharacterFile) {
@@ -725,8 +726,8 @@ async function startEliza(latestCharacterFile) {
         CI: "true",
         DEBUG: "true",
       },
-      detached: true,
-      stdio: ["ignore", "pipe", "pipe"],
+      detached: true, // Run independently of parent process
+      stdio: ["ignore", "pipe", "pipe"], // Ignore stdin, pipe stdout/stderr
     });
 
     let stdoutData = "";
@@ -919,7 +920,7 @@ app.post("/start-agent", async (req, res) => {
   rl.on("line", (input) => {
     if (input.trim().toLowerCase() === "exit") {
       console.log("🛑 Stopping Eliza...");
-      child.kill("SIGTERM"); // Gracefully terminate the child process
+      child.kill("SIGTERM");
       rl.close();
     } else {
       child.stdin.write(input + "\n"); // Send user input to Eliza
@@ -952,6 +953,14 @@ app.post("/chat", async (req, res) => {
   }
 });
 
+const PORT = process.env.PORT || 4001;
+const HOST = process.env.HOST || "0.0.0.0";
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
+});
+
+// Update the error handling middleware at the bottom
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   return sendJsonResponse(res.status(500), {
@@ -960,6 +969,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Add this catch-all middleware for unhandled routes
 app.use((req, res) => {
   return sendJsonResponse(res.status(404), {
     error: "Not Found",
