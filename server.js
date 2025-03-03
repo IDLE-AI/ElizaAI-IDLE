@@ -8,6 +8,7 @@ import pdf2md from "@opendocsg/pdf2md";
 import fetch from "node-fetch";
 import path from "path";
 import readline from "readline";
+import process from "process";
 import util from "util";
 import { join } from "path";
 import { exec, spawn } from "child_process";
@@ -702,7 +703,82 @@ const getLatestCharacterFile = async () => {
   }
 };
 
-let generatedCharacter = null;
+function killProcessOnPort(port) {
+  try {
+    console.log(`🔍 Checking for process on port ${port}...`);
+    const output = execSync(`lsof -i :${port} -t`, {
+      encoding: "utf-8",
+    }).trim();
+
+    if (output) {
+      const pids = output.split("\n");
+      console.log(
+        `🛑 Found ${pids.length} process(es) on port ${port}: ${output}`
+      );
+
+      for (const pid of pids) {
+        if (pid.trim()) {
+          console.log(`🔫 Killing process with PID ${pid}...`);
+          try {
+            execSync(`kill -9 ${pid}`);
+            console.log(`✅ Successfully killed process ${pid}`);
+          } catch (killError) {
+            console.error(
+              `❌ Failed to kill process ${pid}:`,
+              killError.message
+            );
+          }
+        }
+      }
+
+      // Double-check if it's actually killed
+      try {
+        const checkAgain = execSync(`lsof -i :${port} -t`, {
+          encoding: "utf-8",
+        }).trim();
+
+        if (checkAgain) {
+          console.warn(`⚠️ Process on port ${port} still alive: ${checkAgain}`);
+        } else {
+          console.log(`✅ Confirmed port ${port} is now free`);
+        }
+      } catch (checkError) {
+        console.log(`✅ Confirmed port ${port} is now free`);
+      }
+    } else {
+      console.log(`✅ No process found on port ${port}`);
+    }
+  } catch (error) {
+    console.log(
+      `✅ No process found on port ${port} or lsof command failed:`,
+      error.message
+    );
+  }
+}
+function setupCleanupOnExit() {
+  process.on("exit", () => {
+    console.log("🧹 Server shutting down, cleaning up Eliza process...");
+    killProcessOnPort(3000);
+  });
+
+  process.on("SIGINT", () => {
+    console.log("🧹 Received SIGINT (Ctrl+C), cleaning up Eliza process...");
+    killProcessOnPort(3000);
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", () => {
+    console.log("🧹 Received SIGTERM, cleaning up Eliza process...");
+    killProcessOnPort(3000);
+    process.exit(0);
+  });
+  process.on("uncaughtException", (err) => {
+    console.error("❌ Uncaught exception:", err);
+    console.log("🧹 Cleaning up Eliza process before exiting...");
+    killProcessOnPort(3000);
+    process.exit(1);
+  });
+}
 
 async function startEliza(latestCharacterFile) {
   return new Promise((resolve, reject) => {
@@ -726,8 +802,8 @@ async function startEliza(latestCharacterFile) {
         CI: "true",
         DEBUG: "true",
       },
-      detached: true, // Run independently of parent process
-      stdio: ["ignore", "pipe", "pipe"], // Ignore stdin, pipe stdout/stderr
+      detached: true,
+      stdio: ["ignore", "pipe", "pipe"],
     });
 
     let stdoutData = "";
@@ -883,6 +959,8 @@ app.post("/start-agent", async (req, res) => {
     return res.status(500).json({ error: "❌ start_eliza.sh not found!" });
   }
 
+  killProcessOnPort(3000);
+
   const child = spawn("bash", [scriptPath, latestCharacterFile], {
     cwd: __dirname,
     detached: true,
@@ -932,24 +1010,46 @@ app.post("/start-agent", async (req, res) => {
 
 app.post("/chat", async (req, res) => {
   const { walletAddress, contractAddress, message } = req.body;
+  // retrieving character's full path
+  const files = await fs.readdir(CHARACTER_DIR);
+  const jsonFiles = files.filter((file) => file.endsWith(".json"));
+  const fileStats = await Promise.all(
+    jsonFiles.map(async (file) => {
+      const filePath = path.join(CHARACTER_DIR, file);
+      const stats = await fs.stat(filePath);
+      return { filePath, mtime: stats.mtime };
+    })
+  );
+  fileStats.sort((a, b) => b.mtime - a.mtime);
 
   if (!walletAddress || !contractAddress || !message) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
 
   try {
-    const characterData = await fs.readFile(CHARACTER_FILE, "utf-8");
-    const savedCharacter = JSON.parse(characterData);
+    // Get the latest character file path
+    const latestCharacterFile = fileStats[0].filePath;
 
-    const responseMessage = `Character ${savedCharacter.name} received: ${message}`;
+    if (!latestCharacterFile) {
+      return res.status(500).json({ error: "No character file found" });
+    }
+
+    console.log("📄 Using character file:", latestCharacterFile); // Debugging
+
+    // Read the file
+    const characterData = await fs.readFile(latestCharacterFile, "utf-8");
+    const savedCharacter = JSON.parse(characterData);
 
     res.json({
       character: savedCharacter,
-      response: responseMessage,
+      response: `Character ${savedCharacter.name} received: ${message}`,
     });
   } catch (error) {
     console.error("Error retrieving character data:", error);
-    res.status(500).json({ error: "Failed to process chat message" });
+    res.status(500).json({
+      error: "Failed to process chat message",
+      details: error.message,
+    });
   }
 });
 
@@ -958,9 +1058,9 @@ const HOST = process.env.HOST || "0.0.0.0";
 
 app.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
+  setupCleanupOnExit();
 });
 
-// Update the error handling middleware at the bottom
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   return sendJsonResponse(res.status(500), {
@@ -969,7 +1069,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Add this catch-all middleware for unhandled routes
 app.use((req, res) => {
   return sendJsonResponse(res.status(404), {
     error: "Not Found",
