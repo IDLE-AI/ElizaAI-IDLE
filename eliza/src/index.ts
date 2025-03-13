@@ -33,9 +33,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { character } from "./character.ts";
 import type { DirectClient } from "@ai16z/client-direct";
-
+import express from "express";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const app = express();
+app.use(express.json());
 
 export const wait = (minTime: number = 1000, maxTime: number = 3000) => {
   const waitTime =
@@ -293,7 +296,21 @@ const startAgents = async () => {
   let characters = [character];
   console.log("charactersArg", charactersArg);
 
-  if (charactersArg) {
+  if (process.env.ELIZA_CHARACTER_JSON) {
+    try {
+      const characterData = JSON.parse(process.env.ELIZA_CHARACTER_JSON);
+      console.log(
+        "✅ Loaded character:",
+        characterData.name,
+        "ID:",
+        characterData.id
+      );
+      characters = [characterData];
+    } catch (error) {
+      console.error("🚨 Error parsing ELIZA_CHARACTER_JSON:", error);
+      process.exit(1);
+    }
+  } else if (charactersArg) {
     characters = await loadCharacters(charactersArg);
   }
   try {
@@ -381,3 +398,7 @@ async function handleUserInput(input, agentId) {
     );
   }
 }
+// const serverPort = process.env.PORT || "3000";
+// app.listen(serverPort, () => {
+//   console.log("✅ Server running on port ${serverPort}");
+// });

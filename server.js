@@ -9,12 +9,12 @@ import fetch from "node-fetch";
 import path from "path";
 import readline from "readline";
 import process from "process";
-import util from "util";
 import { join } from "path";
 import { exec, spawn } from "child_process";
 import dotenv from "dotenv";
 import os from "os";
-
+import pkg from "pg";
+import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +34,6 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "X-API-Key", "Authorization"],
 };
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (_, file, cb) => cb(null, file.originalname),
@@ -48,32 +47,60 @@ app.use(express.json({ limit: "50mb" }));
 
 app.options("*", cors(corsOptions));
 
+const { Client } = pkg;
+const client = new Client({
+  connectionString: process.env.POSTGRES_URL,
+});
+client.connect();
+
 await fs.mkdir("uploads", { recursive: true }).catch(console.error);
 
 app.post("/save-json", async (req, res) => {
   try {
     const characterData = req.body;
-    console.log("Received character data:", characterData);
-    const filePath = path.join(
-      CHARACTER_DIR,
-      `${characterData.name || "character"}.json`
-    );
 
-    console.log("Ensuring CHARACTER_DIR exists:", CHARACTER_DIR);
-    await fs.mkdir(CHARACTER_DIR, { recursive: true });
-    console.log("CHARACTER_DIR ensured:", CHARACTER_DIR);
+    characterData.name = characterData.name || "";
+    characterData.modelProvider = characterData.modelProvider || "";
+    characterData.clients = Array.isArray(characterData.clients)
+      ? characterData.clients
+      : [];
+    characterData.plugins = characterData.plugins || [];
+    characterData.settings = characterData.settings || {};
+    characterData.bio = Array.isArray(characterData.bio)
+      ? characterData.bio
+      : [];
+    characterData.style = characterData.style || {};
+    characterData.postExamples = characterData.postExamples || [];
+    characterData.messageExamples = characterData.messageExamples || [];
+    characterData.lore = characterData.lore || [];
+    characterData.knowledge = characterData.knowledge || [];
 
-    console.log("Saving JSON to:", filePath);
-    await fs.writeFile(filePath, JSON.stringify(characterData, null, 2));
-    console.log("JSON saved successfully to:", filePath);
+    const query = `
+      INSERT INTO characters (name, model_provider, clients, plugins, settings, bio, style, post_examples, message_examples, lore, knowledge)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING id;
+    `;
 
-    res.json({
-      message: "JSON saved successfully!",
-      filePath: filePath,
-    });
+    const values = [
+      characterData.name,
+      characterData.modelProvider,
+      characterData.clients,
+      JSON.stringify(characterData.plugins),
+      JSON.stringify(characterData.settings),
+      characterData.bio,
+      JSON.stringify(characterData.style),
+      JSON.stringify(characterData.postExamples),
+      JSON.stringify(characterData.messageExamples),
+      JSON.stringify(characterData.lore),
+      JSON.stringify(characterData.knowledge),
+    ];
+
+    const result = await client.query(query, values);
+    console.log("✅ Character saved with ID:", result.rows[0].id);
+    res.json({ success: true, id: result.rows[0].id });
   } catch (err) {
-    console.error("Error saving JSON:", err);
-    res.status(500).send("Failed to save JSON.");
+    console.error("❌ Error saving character to database:", err);
+    res.status(500).json({ error: "Failed to save character." });
   }
 });
 
@@ -941,115 +968,206 @@ app.post("/generate-character", async (req, res) => {
 });
 
 app.post("/start-agent", async (req, res) => {
-  console.log("🚀 Received request to start Eliza");
-
-  const latestCharacterFile = await getLatestCharacterFile();
-
-  if (!latestCharacterFile) {
-    return res.status(500).json({ error: "❌ No character file found!" });
-  }
-
-  console.log(`👋🏻 Starting Eliza with character file: ${latestCharacterFile}`);
-
-  const scriptPath = path.join(__dirname, "start_eliza.sh");
-
   try {
-    await fs.access(scriptPath);
-  } catch (error) {
-    return res.status(500).json({ error: "❌ start_eliza.sh not found!" });
-  }
+    const { characterName } = req.body;
 
-  killProcessOnPort(3000);
-
-  const child = spawn("bash", [scriptPath, latestCharacterFile], {
-    cwd: __dirname,
-    detached: true,
-    stdio: ["pipe", "pipe", "pipe"], // Allow stdin, stdout, stderr
-  });
-
-  let stdoutData = "";
-  let stderrData = "";
-
-  child.stdout.on("data", (data) => {
-    stdoutData += data.toString();
-    console.log(`📜 STDOUT: ${data.toString()}`);
-  });
-
-  child.stderr.on("data", (data) => {
-    stderrData += data.toString();
-    console.error(`🚨 STDERR: ${data.toString()}`);
-  });
-
-  child.on("error", (err) => {
-    console.error("🔥 Spawn Error:", err);
-    res.status(500).json({ error: err.message });
-  });
-
-  child.on("close", (code) => {
-    console.log(`❌ Eliza exited with code ${code}`);
-  });
-
-  // Capture user input
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  rl.on("line", (input) => {
-    if (input.trim().toLowerCase() === "exit") {
-      console.log("🛑 Stopping Eliza...");
-      child.kill("SIGTERM");
-      rl.close();
-    } else {
-      child.stdin.write(input + "\n"); // Send user input to Eliza
+    if (!characterName) {
+      return res
+        .status(400)
+        .json({ error: "Missing required field: characterName" });
     }
-  });
 
-  res.json({ success: true, message: "Eliza started successfully!" });
+    console.log(
+      `🚀 Received request to start AI Agent for character: ${characterName}`
+    );
+
+    exec(`./start_eliza.sh "${characterName}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`❌ Error starting agent: ${error.message}`);
+        return res.status(500).json({ error: "Failed to start agent." });
+      }
+      if (stderr) {
+        console.error(`🚨 STDERR: ${stderr}`);
+      }
+      console.log(`📜 STDOUT: ${stdout}`);
+    });
+
+    res.json({
+      success: true,
+      message: `Agent for ${characterName} is starting...`,
+    });
+  } catch (err) {
+    console.error("❌ Error processing request:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
 });
+// app.post("/start-agent", async (req, res) => {
+//   console.log("🚀 Received request to start AI Agent");
+
+//   const { characterName } = req.body;
+//   if (!characterName) {
+//     return res.status(400).json({ error: "❌ Character name is required!" });
+//   }
+
+//   console.log(`🔍 Fetching character '${characterName}' from database...`);
+
+//   try {
+//     const result = await client.query(
+//       "SELECT * FROM characters WHERE name = $1",
+//       [characterName]
+//     );
+
+//     if (result.rows.length === 0) {
+//       return res.status(404).json({
+//         error: `❌ Character '${characterName}' not found in database!`,
+//       });
+//     }
+
+//     const characterData = result.rows[0];
+//     characterData.messageExamples = characterData.messageExamples || [];
+//     characterData.postExamples = characterData.postExamples || [];
+
+//     console.log(`✅ Character '${characterName}' found. Starting AI Agent...`);
+
+//     const scriptPath = path.join(__dirname, "start_eliza.sh");
+
+//     const child = spawn("bash", [scriptPath], {
+//       cwd: __dirname,
+//       detached: true,
+//       stdio: ["pipe", "pipe", "pipe"],
+//       env: {
+//         ...process.env,
+//         CHARACTER_JSON: JSON.stringify(characterData),
+//       },
+//     });
+
+//     let stdoutData = "";
+//     let stderrData = "";
+
+//     child.stdout.on("data", (data) => {
+//       stdoutData += data.toString();
+//       console.log(`📜 STDOUT: ${data.toString()}`);
+//     });
+
+//     child.stderr.on("data", (data) => {
+//       stderrData += data.toString();
+//       console.error(`🚨 STDERR: ${data.toString()}`);
+//     });
+
+//     child.on("error", (err) => {
+//       console.error("🔥 Spawn Error:", err);
+//       res.status(500).json({ error: err.message });
+//     });
+
+//     child.on("close", (code) => {
+//       console.log(`❌ Eliza exited with code ${code}`);
+//     });
+
+//     res.json({
+//       success: true,
+//       message: `Eliza started successfully with character '${characterName}'!`,
+//     });
+//   } catch (error) {
+//     console.error("🛑 Database error:", error);
+//     return res
+//       .status(500)
+//       .json({ error: "❌ Failed to fetch character from database." });
+//   }
+// });
+
+// app.post("/chat", async (req, res) => {
+//   const { walletAddress, contractAddress, message } = req.body;
+//   const files = await fs.readdir(CHARACTER_DIR);
+//   const jsonFiles = files.filter((file) => file.endsWith(".json"));
+//   const fileStats = await Promise.all(
+//     jsonFiles.map(async (file) => {
+//       const filePath = path.join(CHARACTER_DIR, file);
+//       const stats = await fs.stat(filePath);
+//       return { filePath, mtime: stats.mtime };
+//     })
+//   );
+//   fileStats.sort((a, b) => b.mtime - a.mtime);
+
+//   if (!walletAddress || !contractAddress || !message) {
+//     return res.status(400).json({ error: "Missing required parameters" });
+//   }
+
+//   try {
+//     // Get the latest character file path
+//     const latestCharacterFile = fileStats[0].filePath;
+
+//     if (!latestCharacterFile) {
+//       return res.status(500).json({ error: "No character file found" });
+//     }
+
+//     console.log("📄 Using character file:", latestCharacterFile); // Debugging
+
+//     // Read the file
+//     const characterData = await fs.readFile(latestCharacterFile, "utf-8");
+//     const savedCharacter = JSON.parse(characterData);
+
+//     res.json({
+//       character: savedCharacter,
+//       response: `Character ${savedCharacter.name} received: ${message}`,
+//     });
+//   } catch (error) {
+//     console.error("Error retrieving character data:", error);
+//     res.status(500).json({
+//       error: "Failed to process chat message",
+//       details: error.message,
+//     });
+//   }
+// });
 
 app.post("/chat", async (req, res) => {
-  const { walletAddress, contractAddress, message } = req.body;
-  // retrieving character's full path
-  const files = await fs.readdir(CHARACTER_DIR);
-  const jsonFiles = files.filter((file) => file.endsWith(".json"));
-  const fileStats = await Promise.all(
-    jsonFiles.map(async (file) => {
-      const filePath = path.join(CHARACTER_DIR, file);
-      const stats = await fs.stat(filePath);
-      return { filePath, mtime: stats.mtime };
-    })
-  );
-  fileStats.sort((a, b) => b.mtime - a.mtime);
+  const { characterName, message } = req.body;
 
-  if (!walletAddress || !contractAddress || !message) {
+  if (!characterName || !message) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
 
   try {
-    // Get the latest character file path
-    const latestCharacterFile = fileStats[0].filePath;
+    // Ambil karakter dari database, bukan file lokal
+    const result = await client.query(
+      "SELECT * FROM characters WHERE name = $1",
+      [characterName]
+    );
 
-    if (!latestCharacterFile) {
-      return res.status(500).json({ error: "No character file found" });
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: `Character '${characterName}' not found in database!` });
     }
 
-    console.log("📄 Using character file:", latestCharacterFile); // Debugging
+    const characterData = result.rows[0];
 
-    // Read the file
-    const characterData = await fs.readFile(latestCharacterFile, "utf-8");
-    const savedCharacter = JSON.parse(characterData);
+    console.log("📄 Character found:", characterData.name);
 
-    res.json({
-      character: savedCharacter,
-      response: `Character ${savedCharacter.name} received: ${message}`,
-    });
+    // Kirim pesan ke Eliza
+    const response = await fetch(
+      `http://localhost:3000/${characterData.id}/message`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: message,
+          userId: "user",
+          userName: "User",
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to communicate with AI agent: ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    res.json({ character: characterData, response: data });
   } catch (error) {
-    console.error("Error retrieving character data:", error);
-    res.status(500).json({
-      error: "Failed to process chat message",
-      details: error.message,
-    });
+    console.error("Error processing chat message:", error);
+    res.status(500).json({ error: "Failed to process chat message" });
   }
 });
 
